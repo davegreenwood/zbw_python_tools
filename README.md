@@ -15,3 +15,4 @@ look in mel folder and redo bits of that into python . . .
 
 make generic window class for above^
 
+script to take selected shaders and override the color, spec, ambient, etc for creating render layers?
