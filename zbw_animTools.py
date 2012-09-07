@@ -1,3 +1,7 @@
+###########
+#import zbw_anim tools, call with zbw_animTools.animTools()
+###########
+
 import maya.cmds as cmds
 import random
 
@@ -444,7 +448,7 @@ def zbw_copyAnimRange():
 #         cmds.setAttr((s[1] + att[v]),cmds.getAttr(s[0]+ att[v]))
     
 #create GUI for all of these, one panel, then pull out panel for characters. . .
-def zbw_animTools():
+def animTools():
     #create simple button based GUI for now
     if (cmds.window('zbw_animToolsUI', exists=True)):
         cmds.deleteUI('zbw_animToolsUI', window=True)
