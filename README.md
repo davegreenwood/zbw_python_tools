@@ -13,6 +13,8 @@ ribbon: make a proper ribbon rig :)
 
 look in mel folder and redo bits of that into python . . .
 
-make generic window class for above^
+******make generic window class for above^
 
 script to take selected shaders and override the color, spec, ambient, etc for creating render layers?
+
+anim tools - create UI for main module, create icons for each - fold in the outliers(pulldown)
