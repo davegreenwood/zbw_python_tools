@@ -15,8 +15,6 @@ class Window(object):
 	def createUI(self):
 		"""creates the UI """
 
-#------------- do all of this with form layout?
-
 		self.widgets = {}
 
 		width = self.windowSize[0]
@@ -30,32 +28,35 @@ class Window(object):
 		#menus for future
 		self.menus()
 
-		#self.widgets['formLO'] = cmds.formLayout(nd=100)
 		cmds.setParent(self.widgets["window"])
-		self.widgets["columnLO"] = cmds.columnLayout(w=width)
-		self.widgets["scrollLO"] = cmds.scrollLayout(vst=10, w=width, h=height)
-		#cmds.formLayout(self.widgets["formLO"], e=True, attachForm = [(self.widgets["columnLO"], "top", 0), (self.widgets["columnLO"], "left", 0)])
+		self.widgets['formLO'] = cmds.formLayout(nd=100, w=width)
+		# self.widgets["topColumnLO"] = cmds.columnLayout(w=width)
+		self.widgets["scrollLO"] = cmds.scrollLayout(vst=10)
+		self.widgets["lowColumnLO"] = cmds.columnLayout(w=width)
+		cmds.formLayout(self.widgets["formLO"], e=True, attachForm = [(self.widgets["scrollLO"], "top", 0), (self.widgets["scrollLO"], "left", 0), (self.widgets["scrollLO"], 'right', 0), (self.widgets["scrollLO"], 'bottom', 35)])
 
 		self.commonUI()
 
 		self.customUI()
 
 		#get to buttons bit
-		cmds.setParent(self.widgets["window"])
+		cmds.setParent(self.widgets["formLO"])
 
 		butWidth = width/3 - 10
-		self.widgets["buttonRCLO"] = cmds.rowColumnLayout(w=width, nc=3, cs= [(1, 0), (2,10), (3,10)])
 
 		#add buttons
 		self.widgets["applyCloseButton"] = cmds.button(w=butWidth, h=30, l='Apply and Close', c=partial(self.action, 1))
 		self.widgets["applyButton"] = cmds.button(w=butWidth, h= 30, l='apply', c=partial(self.action, 0))
 		self.widgets['closeButton'] = cmds.button(w=butWidth, h=30, l="close window", c=self.closeWindow)
 
-		#cmds.formLayout(self.widgets["formLO"], e=True, attachForm = [(self.widgets["applyCloseButton"], 'bottom', 5), (self.widgets["applyCloseButton"], 'left', 5))
+		cmds.formLayout(self.widgets["formLO"], e=True, attachForm=[(self.widgets["applyCloseButton"], 'bottom', 5), (self.widgets["applyCloseButton"], 'left', 5)])
+		cmds.formLayout(self.widgets["formLO"], e=True, attachForm=[(self.widgets["closeButton"], 'bottom', 5), (self.widgets["closeButton"], 'right', 5)])
+		cmds.formLayout(self.widgets["formLO"], e=True, attachForm=[(self.widgets["applyButton"], 'bottom', 5)])
+		cmds.formLayout(self.widgets["formLO"], e=True, attachControl=[(self.widgets["applyButton"], 'left', 5, self.widgets["applyCloseButton"]),(self.widgets["applyButton"], 'right', 5, self.widgets["closeButton"])])
+
 
 		cmds.showWindow(self.widgets["window"])
 		cmds.window(self.widgets["window"], e=True, w=width, h=height)
-
 
 	def commonUI(self):
 		#########  modify for inheritence ###########
