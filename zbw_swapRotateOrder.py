@@ -14,7 +14,7 @@ def getTrans():
 	currentFrame = cmds.currentTime(query=True) #gets current frame.
 	transBuffer[currentFrame] = transT[0] #adds the key:value for the frame:rotation
 
-def swapOrder():
+def zbw_swapRotateOrder():
 
 	#find frame range from slider
 	startF = cmds.playbackOptions (query=True, minTime=True)

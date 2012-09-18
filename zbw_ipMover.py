@@ -66,6 +66,6 @@ def changeValue(attr, slider, *args):
 # (coverageY)
 
 
-def ipMover():
+def zbw_ipMover():
     ipMoverUI()
 

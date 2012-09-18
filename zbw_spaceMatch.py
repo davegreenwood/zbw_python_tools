@@ -103,6 +103,6 @@ def getAttr(*args):
     #or we could assume that the selected obj needs to have a "follow" enum attr
     pass
 
-def spaceMatch():
+def zbw_spaceMatch():
     """launches the spaceMatchUI"""
     spaceMatchUI()

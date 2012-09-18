@@ -2,7 +2,7 @@ import maya.OpenMaya as om
 import maya.cmds as cmds
 import math
 
-def ikToFkSnap(*args):
+def zbw_IK2FKSnap(*args):
     """
     select FK wrist joint(or control), fk elbow joint (or ctrl), FK shoulder joint (or ctrl), IK wrist ctl and IK pole vector in that order
     """

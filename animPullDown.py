@@ -177,5 +177,5 @@ def pullDownAnim(*args):
             cmds.setAttr("%s.translate"%wCtrl, localVals[wCtrl][0], localVals[wCtrl][1], localVals[wCtrl][2])
             cmds.setAttr("%s.rotate"%wCtrl, localVals[wCtrl][3], localVals[wCtrl][4], localVals[wCtrl][5])
 
-
-animPullDownUI()
+def zbw_animPullDown():
+    animPullDownUI()

@@ -6,6 +6,7 @@ just some stuff for maya
 
 TO DO: 8/30/12
 need to standardize function calls and all that. . .
+#----- CHANGE NAME OF ALL MASTER FUNCTIONS TO MATCH THE NAME OF THE SCRIPT ITSELF
 
 messageMapper: add scroll bar to UI, call back to UI window to resize (nonadjustable?), call to function shouldn't include "zbw_"
 
