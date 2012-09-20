@@ -93,6 +93,13 @@ def createControl(name,type, axis="x", color="darkBlue", *args):
 	#return the name of the curve
 	return(name)
 
+def createMessage(host="none", attr="none", target="none", *args):
+	"""creates a message attr on object with target as value. Args are: 'host'-some object to hold the message attr, 'attr'-the name of the message attribute to create, and 'target'-the host to be the value of the message attr"""
+	cmds.addAttr(host, at='message', ln=attr)
+	cmds.connectAttr("%s.message"%target, "%s.%s"%(host, attr))
+	return("%s.%s"%(host, attr))
+
+
 #############  good  #############
 def groupOrient(target='none',orig='none', group="GRP"):
 	"""groups the second object and snaps the group to the second (point and orient). The group arg is to name the suffix you want the group to have (default is '_GRP'"""
@@ -164,6 +171,22 @@ def stripToRotateTranslate(first="none", *args):
 		for attr in attrs:
 			objAttr = me + "." + attr
 			cmds.setAttr(objAttr, lock=True, k=False)
+
+def lockTranslate(first="none", *args):
+	attrs = ["tx", "ty", "tz"]
+	objs = []
+	if first=="none":
+		objs = getSelection()
+	else:
+		objs.append(first)
+		if args:
+			for each in args:
+				objs.append(each)
+	for me in objs:
+		for attr in attrs:
+			objAttr = me + "." + attr
+			cmds.setAttr(objAttr, lock=True)
+
 
 ############## good ##################
 def stripTransforms(first="none", *args):
