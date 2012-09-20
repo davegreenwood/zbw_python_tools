@@ -8,9 +8,9 @@ def zbw_IK2FKSnap(*args):
     """
 
     sel = cmds.ls(sl=True)
-    fkEnd = cmds.listConnections((sel[0]+".fkEnd"))
-    fkMid = cmds.listConnections((sel[0]+".fkMid"))
-    fkTop = cmds.listConnections((sel[0]+".fkTop"))
+    fkEnd = cmds.listConnections((sel[0]+".fkEndJnt"))
+    fkMid = cmds.listConnections((sel[0]+".fkMidJnt"))
+    fkTop = cmds.listConnections((sel[0]+".fkTopJnt"))
     ikCtrl = cmds.listConnections((sel[0]+".ikCtrl"))
     ikPv = cmds.listConnections((sel[0]+".ikPv"))
 

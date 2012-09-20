@@ -39,6 +39,7 @@ def zbw_FK2IKSnap(*args):
     cmds.xform(fkTopC, ro=(itr.x, itr.y, itr.z))
 
     #snap FK ctrl to positions
+#-------try:except this part . . . Will only work if the channels aren't locked . . .
     cmds.move(iep.x, iep.y, iep.z, fkEndC, ws=True)
     cmds.move(imp.x, imp.y, imp.z, fkMidC, ws=True)
     cmds.move(iep.x, iep.y, iep.z, fkEndC, ws=True)
