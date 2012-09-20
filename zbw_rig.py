@@ -24,9 +24,37 @@ def getSelection():
 	objs = cmds.ls(sl=True)
 	return objs
 
-###########  good but needs more objects, maybe add color here? ############
-def createControl(name,type, axis="x", *args):
-	"""creates control named by first arg, at origin. shape is determined by second arg: "cube", "octogon", "sphere", "diamond", third arg can be 'x', 'y' or 'z' and is the axis along which the control lies"""
+###########  good but needs more objects ############
+def createControl(name,type, axis="x", color="darkBlue", *args):
+	"""creates control named by first arg, at origin. shape is determined by second arg: "cube", "octogon", "sphere", "diamond", third arg can be 'x', 'y' or 'z' and is the axis along which the control lies. The colors are: 'lightBlue', 'darkGreen', 'lightPurple', 'yellow', 'darkPurple', 'pink', 'blue', 'purple', 'lightGreen', 'black', 'orange', 'white', 'darkYellow', 'brown', 'lightYellow', 'darkBlue', 'royalBlue', 'darkBrown', 'lightRed', 'medBlue', 'lightBrown', 'darkRed', 'yellowGreen', 'medGreen', 'green', 'red'"""
+	colors = {}
+	colors["red"]=13
+	colors["blue"]=6
+	colors["green"]=14
+	colors["darkRed"]=4
+	colors["lightRed"]=31
+	colors["darkBlue"]=5
+	colors["medBlue"]=15
+	colors["lightBlue"]=18
+	colors["royalBlue"]=29
+	colors["darkGreen"]=7
+	colors["medGreen"]=27
+	colors["lightGreen"]=19
+	colors["yellowGreen"]=26
+	colors["yellow"]=17
+	colors["darkYellow"]=21
+	colors["lightYellow"]=22
+	colors["purple"]=30
+	colors["lightPurple"]=9
+	colors["darkPurple"]=8
+	colors["black"]=1
+	colors["white"]=16
+	colors["brown"]=10
+	colors["darkBrown"]=11
+	colors["lightBrown"]=24
+	colors["pink"]=20
+	colors["orange"] =12
+
 	#deal with axis, x is default
 	if axis == "x":
 		rot = (0, 0, 0)
@@ -58,6 +86,10 @@ def createControl(name,type, axis="x", *args):
 	cmds.select(name+".cv[*]")
 	cmds.rotate(rot[0], rot[1], rot[2], r=True)
 	cmds.select(cl=True)
+	shapes = cmds.listRelatives(name, shapes=True)
+	for shape in shapes:
+		cmds.setAttr("%s.overrideEnabled"%shape, 1)
+		cmds.setAttr("%s.overrideColor"%shape, colors[color])
 	#return the name of the curve
 	return(name)
 
@@ -378,7 +410,7 @@ def measureDistance(mName="none", *args):
 	return(dist)
 
 #############  good ##############
-def scaleStretchIK(limbName, ikTop, ikMid, ikLow, jntMeasure, IKMeasure, IKCtrl, axis, *args):
+def scaleStretchIK(limbName="none", ikTop="none", ikMid="none", ikLow="none", jntMeasure="none", IKMeasure="none", IKCtrl="none", axis="none", *args):
 	"""creates a stretch setup for 3 joint IK chain. Inputs (strings) are the limbName, 3 ik joints (top to bottom), the measure input for the whole chain (add up from measure joints), the measure for the ikCtrl, the ik handle or ctrl (which must have 'scaleMin', 'upScale' and 'lowScale' attrs, the axis letter. Returns . . . """
 
 	ratioMult = cmds.shadingNode("multiplyDivide", asUtility=True, n="%s_stretchRatioMult"%limbName)
@@ -420,7 +452,7 @@ def scaleStretchIK(limbName, ikTop, ikMid, ikLow, jntMeasure, IKMeasure, IKCtrl,
 	return(ratioMult, defaultMult, defaultBlend, conditional, upScaleMult, loScaleMult)
 
 ######### good ###########
-def translateStretchIK(limbName, ikTop, ikMid, ikLow, jntMeasure, IKMeasure, IKCtrl, axis, posNeg, *args):
+def translateStretchIK(limbName="none", ikTop="none", ikMid="none", ikLow="none", jntMeasure="none", IKMeasure="none", IKCtrl="none", axis="none", posNeg="none", *args):
 	"""creates a stretch setup for 3 joint IK chain. Inputs (strings) are the limbName, 3 ik joints (top to bottom), the measure input for the whole chain (add up from measure joints?), the measure for the ikCtrl, the ik handle or ctrl (which must have 'scaleMin' attr, the axis letter, and PosNeg, which is +1 or -1 (minus for things in negative direction/mirror). Returns . . . """
 	#set up the ratio of ctrl to measure
 	ratioMult = cmds.shadingNode("multiplyDivide", asUtility=True, n="%s_stretchRatioMult"%limbName)
