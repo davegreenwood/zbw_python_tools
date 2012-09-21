@@ -7,7 +7,7 @@ class Window(object):
 	def __init__(self):
 		####### modify for inheritence ########
 		self.windowName = "thisTestWindow"
-		self.windowSize = [400, 200]
+		self.windowSize = [420, 200]
 		self.sizeable = 1
 
 		self.createUI()
@@ -24,7 +24,7 @@ class Window(object):
 			cmds.deleteUI("zbw_win")
 
 		self.widgets["window"] = cmds.window("zbw_win", title=self.windowName, w=width, h=height, s=self.sizeable)
-		
+
 		#menus for future
 		self.menus()
 
@@ -71,7 +71,10 @@ class Window(object):
 		pass
 
 	def action(self, close, *args):
+		############ modify for inheritence #############
 		#do the action here
+
+		#close window
 		if close:
 			self.closeWindow()
 		pass

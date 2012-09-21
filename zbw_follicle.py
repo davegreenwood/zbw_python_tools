@@ -3,62 +3,49 @@ import maya.cmds as cmds
 import maya.mel as mel
 
 
-def zbw_follicle(surface="none", u=0.0, v=0.0, *args):
-	#get the surface
-	#get the uv positions
+def zbw_follicle(surface="none", folName="none", u=0.5, v=0.5, *args):
 
-	#createHair 1 6 2 0 0 0 0 5 0 2 1 1; example with 6 follicles
-	#hairSystem1OutputCurves - name of hair curve group
+#------------do a bit more checking here to make sure the shapes, numbers etc work out
+	if surface=="none":
+		#decide if surface is polymesh or nurbsSurface
+		surfaceXform = cmds.ls(sl=True, dag=True, type="transform")[0]
+		surfaceShape = cmds.listRelatives(surfaceXform, shapes=True)[0]
+	else:
+		surfaceXform = surface
+		surfaceShape = cmds.listRelatives(surfaceXform, shapes=True)[0]
 
-	# sel = cmds.ls(sl=True)[0]
-	# shape = cmds.listRelatives(sel, shapes=True)
-	# print shape
+	if folName == "none":
+		folShapeName = "myFollicleShape"
+		folXformName = "myFollicle"
+	else:
+		folShapeName = "%sShape"%folName
+		folXformName = folName
 
-	# type = cmds.objectType(shape)
-	# print type
+	#create the follicle
+	folShape = cmds.createNode("follicle", n=folShapeName)
+	folXform = cmds.listRelatives(folShape, p=True, type="transform")[0]
+	cmds.rename(folXform, folXformName)
 
-	# follList = cmds.ls(type="follicle")
-	# print follList
+	#connect up the follicle!
+	#connect the matrix of the surface to the matrix of the follicle
+	cmds.connectAttr("%s.worldMatrix[0]"%surfaceShape, "%s.inputWorldMatrix"%folShape)
 
-	# string $nur
+	#check for surface type, poly or nurbs and connect the matrix into the follicle
+	if (cmds.nodeType(surfaceShape)=="nurbsSurface"):
+		cmds.connectAttr("%s.local"%surfaceShape, "%s.inputSurface"%folShape)
+	elif (cmds.nodeType(surfaceShape)=="mesh"):
+		cmds.connectAttr("%s.outMesh"%surfaceShape, "%s.inputMesh"%folShape)
+	else:
+		cmds.warning("not the right kind of selection. Need a poly or nurbs surface")
 
+	#connect the transl, rots from shape to transform of follicle
+	cmds.connectAttr("%s.outTranslate"%folShape, "%s.translate"%folXform)
+	cmds.connectAttr("%s.outRotate"%folShape, "%s.rotate"%folXform)
 
-	# string $poly[] = `ls -sl -dag -type mesh`;
-	# string $fol = `createNode follicle`;
-	# string $folTrans[] = `listRelatives -parent $fol`;
-	# connectAttr -f ($poly[0]+".worldMatrix") ($fol+".inputWorldMatrix");
-	# connectAttr -f ($poly[0]+".outMesh") ($fol + ".inputMesh");
-	# connectAttr -f ($fol+".outTranslate") ($folTrans[0] + ".translate");
-	# connectAttr -f ($fol+".outRotate") ($folTrans[0] + ".rotate");
-	# setAttr ($fol+".parameterU") 0.75;
-	# setAttr ($fol+".parameterV") 0.75;
+	cmds.setAttr("%s.parameterU"%folShape, u)
+	cmds.setAttr("%s.parameterV"%folShape, v)
 
-#one way to do it
-# {
-# 	string $follicle = `createNode follicle`;
-# 	string $tforms[] = `listTransforms $follicle`;
-# 	string $follicleDag = $tforms[0];
+	cmds.setAttr("%s.translate"%folXform, l=True)
+	cmds.setAttr("%s.rotate"%folXform, l=True)
 
-	
-# 	connectAttr ($surface + ".worldMatrix[0]") ($follicle + ".inputWorldMatrix");
-# 	string $nType = `nodeType $surface`;
-# 	if( "nurbsSurface" == $nType ){ 
-# 		connectAttr ($surface + ".local") ($follicle + ".inputSurface");
-# 	} else {
-# 		connectAttr ($surface + ".outMesh") ($follicle + ".inputMesh");
-# 	}
-# 	connectAttr ($follicle + ".outTranslate") ($follicleDag + ".translate");
-# 	connectAttr ($follicle + ".outRotate") ($follicleDag + ".rotate");
-# 	setAttr -lock true  ($follicleDag + ".translate");
-# 	setAttr -lock true  ($follicleDag + ".rotate");
-# 	setAttr ($follicle + ".parameterU") $u;
-# 	setAttr ($follicle + ".parameterV") $v;
-	
-# 	//parent -addObject -shape $obj $follicleDag;
-# 	parent $obj $follicleDag;
-# }
-
-
-
-
-	pass
+zbw_follicle()
