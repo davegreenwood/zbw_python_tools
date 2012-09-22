@@ -48,4 +48,7 @@ def zbw_follicle(surface="none", folName="none", u=0.5, v=0.5, *args):
 	cmds.setAttr("%s.translate"%folXform, l=True)
 	cmds.setAttr("%s.rotate"%folXform, l=True)
 
+	return(folXform, folShape)
+
+
 zbw_follicle()
