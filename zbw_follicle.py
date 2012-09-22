@@ -2,6 +2,8 @@
 import maya.cmds as cmds
 import maya.mel as mel
 
+#here create a UI that will just pass info into the main func. So you can call function if you want with args or use the UI
+
 
 def zbw_follicle(surface="none", folName="none", u=0.5, v=0.5, *args):
 
