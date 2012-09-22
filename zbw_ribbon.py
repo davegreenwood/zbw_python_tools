@@ -5,20 +5,32 @@ import maya.OpenMaya as om
 
 class RibbonUI(win.Window):
 	def __init__(self):
-		super(RibbonUI, self).__init__()
+		self.windowName = "thisTestWindow"
+		self.windowSize = [420, 300]
+		self.sizeable = 1
+
+		self.createUI()
 
 	def commonUI(self):
 		pass
 
 	def customUI(self):
-		self.widgets["ribbonNameTFG"] = cmds.textFieldGrp(l="Ribbon Name", tx="ribbon")
-		self.widgets["divisionsIFG"] = cmds.intFieldGrp(l="Number of Divisions (odd nums work best)", v1=5)
+		self.widgets["ribbonNameTFG"] = cmds.textFieldGrp(l="Ribbon Rig Name", cal=[(1, "left"), (2, "left")], cw=[(1, 100), (2, 200)], tx="ribbon")
+		cmds.separator(h=20, style="single")
+		cmds.text("Use minimum 3 joints, odd numbers work best")
+		self.widgets["jointsIFG"] = cmds.intFieldGrp(l="Number of Joints", cal=([1,"left"]), cw=([1, 125], [2,100]),v1=5)
+		self.widgets["axis"] = cmds.radioButtonGrp(l="Ribbon Ctrl Axis", nrb=3,     l1="x", l2="y", l3="z", cal=([1,"left"]), cw=([1, 125], [2,50], [3,50]), sl=1, en=True)
 		self.widgets["fkSetupCB"] = cmds.checkBox(l="Setup FK Controls", v=1)
-		self.widgets["heightFFG"] = cmds.floatFieldGrp(l="Ribbon Height", v1=10.0)
-		self.widgets["ratioFFG"] = cmds.floatFieldGrp(l="Heigth/width Ratio", v1=5)
-		cmds.text("add more stuff about ribbon shape here")
-		#axis for nurbs plane
+		self.widgets["heightFFG"] = cmds.floatFieldGrp(l="Ribbon Height", cal= [(1, "left"), (2, "left")], cw= [(1, 125), (2, 100)], v1=10.0)
+		self.widgets["ratioFFG"] = cmds.floatFieldGrp(l="Heigth/width Ratio", cal= [(1, "left"), (2, "left")], cw= [(1, 125), (2, 100)], v1=5)
 		#option for making (or not) control structure
+		#-------option to use my own surface?
+		self.widgets["existingGeoCB"] = cmds.checkBox(l="Use existing nurbs curve", v=0, cc=self.geoEnable)
+		#this will reveal text field grp w button
+		#checking and unchecking will activate options (and deactivate)
+		self.widgets["geoTFBG"] = cmds.textFieldButtonGrp(l="Select Geometry", bl="<<<", en=False, cal=[(1,"left"), (2, "left"), (3, "left")], cw=[(1, 100), (2, 250), (3, 50)])
+
+		#option for indiv follicle controls?
 
 	def action(self, close, *args):
 		#do the action here
@@ -45,24 +57,38 @@ class RibbonUI(win.Window):
 		#########  modify for inheritence ###########
 		print("test load values")
 
+	def geoEnable(self, *args):
+		#toggle the enable
+		#get the state of the button
+		state = cmds.checkBox(self.widgets["existingGeoCB"], q=True, v=True)
+		if state:
+			cmds.textFieldButtonGrp(self.widgets["geoTFBG"], e=True, en=True)
+			cmds.floatFieldGrp(self.widgets["heightFFG"], e=True, en=False)
+			cmds.floatFieldGrp(self.widgets["ratioFFG"] , e=True, en=False)
+		else:
+			cmds.textFieldButtonGrp(self.widgets["geoTFBG"], e=True, en=False)
+			cmds.floatFieldGrp(self.widgets["heightFFG"], e=True, en=True)
+			cmds.floatFieldGrp(self.widgets["ratioFFG"] , e=True, en=True)
+
 	def createRibbon(self, *args):
 		self.name = cmds.textFieldGrp(self.widgets["ribbonNameTFG"], q=True, tx=True)
-		self.numDiv = (cmds.intFieldGrp(self.widgets["divisionsIFG"], q=True, v=True)[0]) -1
+		self.numDiv = (cmds.intFieldGrp(self.widgets["jointsIFG"], q=True, v=True)[0]) -1
 		self.fk = cmds.checkBox(self.widgets["fkSetupCB"], q=True, v=True)
 		self.height = cmds.floatFieldGrp(self.widgets["heightFFG"], q=True, v1=True)
 		self.ratio = cmds.floatFieldGrp(self.widgets["ratioFFG"], q=True, v1=True)
+		self.axis = cmds.radioButtonGrp(self.widgets["axis"] , q=True, sl=True)
 		self.ribbonName = "%s_ribbonGeo"%self.name
 		self.numJoints = self.numDiv
 		self.follicleList = []
 		self.follicleJntList = []
+		self.own = cmds.checkBox(self.widgets["existingGeoCB"], q=True, v=0)
 
-#-------make sure the num of divisions is at least 1
-#-------option to use my own surface?
-		#print(self.name, self.numDiv, self.fk)
+#-----------make sure the num of divisions is at least 1
+#-----------get axis letter
+#-----------create the nurbs plane in the correct axis (just make the plane in the axis and figure out how to rotate joint local rotational axes to match it)
 		width = self.height/self.ratio
 		#create the nurbsPlane
 		cmds.nurbsPlane(ax=[0, 0, 1], w=width, lr=self.ratio, d=3, u=1, v=self.numDiv, ch=0, n=self.ribbonName)
-#-------look into whether this is the best reuild (xtra cvs next to end)
 		cmds.rebuildSurface (self.ribbonName, ch=0, rpo=1, rt=0, end=1, kr=0, kcp=0, kc=0, su=1, du=1, sv=self.numDiv, dv=3, tol=0.1, fr=0, dir=0)
 		cmds.move(0, self.height/2, 0, self.ribbonName)
 		cmds.xform(self.ribbonName, ws=True, rp=[0, 0, 0])
@@ -72,7 +98,6 @@ class RibbonUI(win.Window):
 		#find the ratio for the uv's (one dir will be .5, the other a result of the num joints)
 		factor = 1.0/self.numJoints
 
-#-------create follicle group and put each follicle in there
 #-------keep follicle joints separate, not parente under each follicle, separate group for those
 #-------follicle jnts each go under a ctrl (star) that is under a group. That group gets parent constrained to the follicles
 		for x in range (self.numJoints+1):
@@ -97,9 +122,8 @@ class RibbonUI(win.Window):
 
 		midVec = (baseVec + topVec)/2
 
-		#-------create some options with switches for how things aim, etc at each other
+#-----------create some options with switches for how things aim, etc at each other
 		#create ctrl structure
-		# structure looks like -- 1. topGrp, 1+a.base_constrainGrp, 1+b.up_Loc, 1+a+1.baseCtrl, 1+a+1+1. baseJnt
 		prefixList = ["base", "mid", "top"]
 		groupList = []
 		vecList = [baseVec, midVec, topVec]
@@ -164,7 +188,6 @@ class RibbonUI(win.Window):
 #-------also add in the FK option here, too. . .
 
 		#start packaging stuff up
-
 #-------hide the locators
 
 		folGroup = cmds.group(empty=True, n="%s_follicles_GRP"%self.name)
