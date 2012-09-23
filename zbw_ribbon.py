@@ -19,12 +19,13 @@ class RibbonUI(win.Window):
 	def customUI(self):
 		self.widgets["ribbonNameTFG"] = cmds.textFieldGrp(l="Ribbon Rig Name", cal=[(1, "left"), (2, "left")], cw=[(1, 100), (2, 200)], tx="ribbon")
 		cmds.separator(h=10, style="single")
-		self.widgets["jointsIFG"] = cmds.intFieldGrp(l="Number of Joints (3 minimum)", cal=([1,"left"]), cw=([1, 125], [2,100]),v1=5)
+		self.widgets["jointsIFG"] = cmds.intFieldGrp(l="Number of Jnts (3 min)", cal=([1,"left"]), cw=([1, 125], [2,100]),v1=5)
 		self.widgets["axis"] = cmds.radioButtonGrp(l="Ribbon Ctrl Axis", nrb=3, l1="x", l2="y", l3="z", cal=([1,"left"]), cw=([1, 125], [2,50], [3,50]), sl=2, en=True)
 		self.widgets["fkSetupCB"] = cmds.checkBox(l="Setup FK Controls", v=1)
 		self.widgets["heightFFG"] = cmds.floatFieldGrp(l="Ribbon Height", cal= [(1, "left"), (2, "left")], cw= [(1, 125), (2, 100)], v1=10.0)
 		self.widgets["ratioFFG"] = cmds.floatFieldGrp(l="Heigth/width Ratio", cal= [(1, "left"), (2, "left")], cw= [(1, 125), (2, 100)], v1=5)
-#-------create a slider for where we want the middle piece of the ribbon
+		#create a slider for where we want the middle piece of the ribbon
+		self.widgets["centerPosFSG"] = cmds.floatSliderGrp(l="Center Ctrl Position", f=True, cal = [(1, "left"), (2,"left"), (3,"left")], cw=[(1, 125), (2, 50), (3, 200)], min=0, max=1, fmn=0, fmx=1, v=0.5, pre=3)
 		#option for making (or not) control structure
 		#-------option to use my own surface?
 		self.widgets["existingGeoCB"] = cmds.checkBox(l="Use existing nurbs curve", v=0, cc=self.geoEnable)
@@ -98,29 +99,49 @@ class RibbonUI(win.Window):
 		self.height = cmds.floatFieldGrp(self.widgets["heightFFG"], q=True, v1=True)
 		self.ratio = cmds.floatFieldGrp(self.widgets["ratioFFG"], q=True, v1=True)
 		self.axis = cmds.radioButtonGrp(self.widgets["axis"] , q=True, sl=True)
+
+		print("axis = :%s"%self.axis)
 		self.ribbonName = "%s_ribbonGeo"%self.name
 		self.numJoints = self.numDiv
 		self.follicleList = []
 		self.follicleJntList = []
 		self.own = cmds.checkBox(self.widgets["existingGeoCB"], q=True, v=True)
 		self.myGeo = cmds.textFieldButtonGrp(self.widgets["geoTFBG"], q=True, tx=True)
+		self.dir = cmds.radioButtonGrp(self.widgets["directionRBG"], q=True, sl=True )
+		print("dir: %s"%self.dir)
+		self.centerPos = cmds.floatSliderGrp(self.widgets["centerPosFSG"], q=True, v=True )
 
-#-----------here do a quick check to see if the use own geo is selected
 #-----------make sure the num of divisions is at least 1
-#-----------get axis letter
 #-----------create the nurbs plane in the correct axis (just make the plane in the axis and figure out how to rotate joint local rotational axes to match it)
 #-----------or get pre-existing surface
 		if self.own == 0:
+			self.dir = 2
+		if self.dir == 1:
+			dir = "u"
+			uDiv = self.numDiv
+			vDiv = 1
+		else:
+			dir = "v'"
+			uDiv = 1
+			vDiv = self.numDiv
+
+		# if self.axis  == 1:
+		axis = [0, 0, 1]
+		# elif self.axis  == 2:
+		# 	axis = [0, 1, 0]
+		# elif self.axis  == 3:
+		# 	axis = [0, 0, 1]
+									
+		if self.own == 0:
 			width = self.height/self.ratio
 			#create the nurbsPlane
-			cmds.nurbsPlane(ax=[0, 0, 1], w=width, lr=self.ratio, d=3, u=1, v=self.numDiv, ch=0, n=self.ribbonName)
+			cmds.nurbsPlane(ax=axis, w=width, lr=self.ratio, d=3, u=uDiv, v=vDiv, ch=0, n=self.ribbonName)
 			cmds.rebuildSurface (self.ribbonName, ch=0, rpo=1, rt=0, end=1, kr=0, kcp=0, kc=0, su=1, du=1, sv=self.numDiv, dv=3, tol=0.1, fr=0, dir=0)
 			cmds.move(0, self.height/2, 0, self.ribbonName)
+
 			cmds.xform(self.ribbonName, ws=True, rp=[0, 0, 0])
 		else:
 			self.ribbonName = self.myGeo
-
-		#create the follicles on the surface
 
 		#find the ratio for the uv's (one dir will be .5, the other a result of the num joints)
 		factor = 1.0/self.numJoints
@@ -128,11 +149,17 @@ class RibbonUI(win.Window):
 #-------keep follicle joints separate, not parente under each follicle, separate group for those
 #-------follicle jnts each go under a ctrl (star) that is under a group. That group gets parent constrained to the follicles
 #-------these joints should be aligned with the follicles??? does that make a difference?
+
+		#create the follicles on the surface, joints on the follicles
 		for x in range (self.numJoints+1):
-			Vval = x * factor
+			val = x * factor
 			folName = "%s_follicle%s"%(self.name, x)
-			follicle = rig.follicle(self.ribbonName, folName, 0.5, Vval)[0]
-			print(follicle)
+			#create a follicle in the right direction
+			if self.dir ==1:
+				follicle = rig.follicle(self.ribbonName, folName, val, 0.5)[0]
+			else:
+				follicle = rig.follicle(self.ribbonName, folName, 0.5, val)[0]
+
 			self.follicleList.append(follicle)
 
 			#create joint and parent to follicle
@@ -147,11 +174,13 @@ class RibbonUI(win.Window):
 		topPosRaw = cmds.xform(self.follicleJntList[self.numJoints], ws=True, q=True, t=True)
 		baseVec = om.MVector(basePosRaw[0], basePosRaw[1], basePosRaw[2])
 		topVec = om.MVector(topPosRaw[0], topPosRaw[1], topPosRaw[2])
-#--------figure out how to put this anywhere along the ribbon I want. . . .
-		ratio = .5 #number 0-1, .5 is the middle
+
+		#find the center position
+		ratio = self.centerPos #number 0-1, .5 is the middle
+
+#-----------this is where I should use the pointOnSurface?  or a follicle (which I'll then delete) to find the position and rotation of the midpoint
 		midVec = ((baseVec + topVec)/2)*(ratio*2)
 
-#-----------create some options with switches for how things aim, etc at each other
 		#create ctrl structure
 		prefixList = ["base", "mid", "top"]
 		groupList = []
@@ -161,6 +190,7 @@ class RibbonUI(win.Window):
 		ctrlList = []
 		ctrlJntList = []
 
+#-----------create some options with switches for how things aim, etc at each other
 #--------deal with axis stuff below
 #-------align these controls to the shape of the surface we're using (either g.o. them or use a follicle then delete it, or get surface info)
 #-------then down below we need to use object space to move the locators
