@@ -1,6 +1,12 @@
-#############
-# import zbw_messageMapper, call zbw_messageMapper.messageMapper()
-############
+########################
+#file: zbw_messageMapper.py
+#author: zeth willie
+#contact: zeth@catbuks.com, www.williework.blogspot.com, https://github.com/zethwillie
+#date modified: 09/23/12
+#
+#notes: for checking and creating message attributes for objs in the scene (through UI).
+#to run: import zbw_messageMapper; zbw_messageMapper.zbw_messageMapper()
+########################
 
 import maya.cmds as cmds
 from functools import partial
