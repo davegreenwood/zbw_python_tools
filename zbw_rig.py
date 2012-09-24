@@ -1,14 +1,14 @@
-#zbw_rig
+########################
+#file: zbw_rig.py
+#author: zeth willie
+#contact: zeth@catbuks.com, www.williework.blogspot.com, https://github.com/zethwillie
+#date modified: 09/23/12
+#
+#notes: helper scripts for rigging
+########################
 
 import maya.cmds as cmds
 import zbw_rig as rig
-
-#can try this
-#for arguments with a) entered or b) selected use (*args)
-#this way I'm getting a list (or tuple) in each case
-#THEN define variables in body
-#if args = (), then get selection()
-#if args != the right number, then error "haven't enetered right # vars
 
 def getTwoSelection():
 	"""gets two objects (only) from selection and returns them in selected order as a tuple"""
