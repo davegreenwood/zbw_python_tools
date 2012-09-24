@@ -1,7 +1,13 @@
-##########
-#gets selected obj and uses a slider to scale it's components, leaving the transform clean
-#import zbw_shapeScale, call with zbw_shapeScale.shapeScale()
-#########
+########################
+#file: zbw_shapeScale.py
+#author: zeth willie
+#contact: zeth@catbuks.com, www.williework.blogspot.com, https://github.com/zethwillie
+#date modified: 09/23/12
+#
+#notes: creates a uI that one can use to scale selected nurbs curves from the cvs
+########################
+
+
 import maya.cmds as cmds
 
 
