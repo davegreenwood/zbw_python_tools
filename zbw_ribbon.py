@@ -1,4 +1,13 @@
-import maya.cmds as cmds
+########################
+#file: zbw_ribbon.py
+#author: zeth willie
+#contact: zeth@catbuks.com, www.williework.blogspot.com
+#date modified: 09/23/12
+#
+#notes: calls the class that creates the ribbon. The UI has options for a few things . . . .
+#call with: import zbw_ribbon; zbw_ribbon.zbw_ribbon()
+########################
+
 import zbw_rig as rig
 import zbw_window as win
 import maya.OpenMaya as om
