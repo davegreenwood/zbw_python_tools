@@ -3,6 +3,7 @@ import maya.OpenMaya as om
 
 #use the u and v position to position and align an object to that part of the surface
 
+#Does this create a new node? Check that out. If it does, delete the node
 pos = cmds.pointOnSurface("nurbsPlane1", u=0.5, v=0.5, position=True)
 posVec = om.MVector(pos[0], pos[1], pos[2])
 cmds.xform("pCube1", ws=True, t=pos)
