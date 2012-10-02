@@ -1,0 +1,31 @@
+
+# assume vPos, vNor, vTanU, and vTanV have already been
+# filled by prior code
+
+def matSetRow(matrix, row, newVector):
+m.MScriptUtil.setDoubleArray( matrix[row], 0, newVector.x )
+m.MScriptUtil.setDoubleArray( matrix[row], 1, newVector.y )
+m.MScriptUtil.setDoubleArray( matrix[row], 2, newVector.z )
+
+def matSetCell(matrix, row, column, value):
+m.MScriptUtil.setDoubleArray( matrix[row], column, value )
+
+def radsToDegrees(rads):
+return rads * 180.0 / math.pi
+
+mat4x4 = m.MMatrix()
+
+matSetRow(mat4x4, 0, vTanU)
+matSetRow(mat4x4, 1, vNor)
+matSetRow(mat4x4, 2, vTanV)
+matSetRow(mat4x4, 3, vPos)
+matSetCell(mat4x4, 0, 3, 0)
+matSetCell(mat4x4, 1, 3, 0)
+matSetCell(mat4x4, 2, 3, 0)
+matSetCell(mat4x4, 3, 3, 1)
+
+mTrans = m.MTransformationMatrix(mat4x4)
+mEuler = mTrans.eulerRotation()
+
+print "%f %f %f" % (radsToDegrees(mEuler[0]),
+radsToDegrees(mEuler[1]), radsToDegrees(mEuler[2]))
