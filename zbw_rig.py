@@ -9,6 +9,8 @@
 
 import maya.cmds as cmds
 import zbw_rig as rig
+import math
+import maya.OpenMaya as om
 
 def getTwoSelection():
 	"""gets two objects (only) from selection and returns them in selected order as a tuple"""
@@ -149,6 +151,33 @@ def createMessage(host="none", attr="none", target="none", *args):
 	cmds.connectAttr("%s.message"%target, "%s.%s"%(host, attr))
 	return("%s.%s"%(host, attr))
 
+############# good ###############
+def alignToUV(targetObj="none", sourceObj="none", sourceU=0.0, sourceV=0.0, mainAxis="+z", secAxis="+x", UorV="v"):
+	"""
+	inputs should be 1. targetObj 2. sourceObj 3. sourceU 4. sourceV 5. mainAxis(lowerCase, + or -, i.e."-x" 8. secAxis (lowcase, + or -) 7, UorV ("u" or "v" for the direction along surface for the sec axis)
+"""
+
+	axisDict = {"+x":(1,0,0), "+y":(0,1,0), "+z":(0,0,1), "-x":(-1,0,0), "-y":(0,-1,0), "-z":(0,0,-1)}
+
+	#Does this create a new node? no To create a node, use the flag "ch=True". That creates a pointOnSurface node
+	pos = cmds.pointOnSurface(sourceObj, u=sourceU, v=sourceV, position=True)
+	posVec = om.MVector(pos[0], pos[1], pos[2])
+	cmds.xform(targetObj, ws=True, t=pos)
+
+	#get normal, tanU and tanV at selected UV position on source surface
+	tanV = cmds.pointOnSurface(sourceObj, u=sourceU, v=sourceV, tv=True)
+	tanU = cmds.pointOnSurface(targetObj, u=sourceU, v=sourceV, tu=True)
+	norm = cmds.pointOnSurface(targetObj, u=sourceU, v=sourceV, nn=True)
+
+	#decide where up axis is on normal constraint, u or v tangent
+	if UorV == "v":
+		wup = tanV
+	elif UorV == "u":
+		wup = tanU
+
+	#create normal constraint
+	nc = cmds.normalConstraint(sourceObj, targetObj, aimVector=axisDict[mainAxis], upVector=axisDict[secAxis], worldUpVector=(wup))
+	cmds.delete(nc) #delete constraint
 
 #############  good  #############
 def groupOrient(target='none',orig='none', group="GRP"):
