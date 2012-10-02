@@ -11,12 +11,13 @@
 import zbw_rig as rig
 import zbw_window as win
 import maya.OpenMaya as om
+import maya.cmds as cmds
 
 
-#----------figure out how to make midpoint adjustable . . .
+#----------figure out how to make midpoint adjustable (visually???) . . .
 class RibbonUI(win.Window):
 	def __init__(self):
-		self.windowName = "thisTestWindow"
+		self.windowName = "zbw_ribbon"
 		self.windowSize = [420, 280]
 		self.sizeable = 1
 
@@ -43,6 +44,7 @@ class RibbonUI(win.Window):
 		self.widgets["geoTFBG"] = cmds.textFieldButtonGrp(l="Select Geometry", bl="<<<", en=False, cal=[(1,"left"), (2, "left"), (3, "left")], cw=[(1, 100), (2, 250), (3, 50)], bc=self.getGeo)
 		self.widgets["directionRBG"] = cmds.radioButtonGrp(l="Along U or V?", nrb=2, l1="u", l2="v", cal=[(1, "left"), (2, "left")], cw=[(1, 100), (2,50), (3,50)], sl=2, en=False)
 
+#----------------deal better with the x, y, z (should be "+x", "-x", etc)
 		#option for indiv follicle controls?
 
 	def action(self, close, *args):
@@ -95,7 +97,7 @@ class RibbonUI(win.Window):
 			cmds.warning("yo. Select one and only one nurbs surface")
 		else:
 			#check for nurbsy-ness
-			if (cmds.objectType(cmds.listRelatives(sel[0], shapes=True))!="nurbsSurface"):
+			if (cmds.objectType(cmds.listRelatives(sel[0], shapes=True)[0])!="nurbsSurface"):
 				cmds.error("Selected is not a nurbs surface")
 			else:
 				cmds.textFieldButtonGrp(self.widgets["geoTFBG"], e=True, tx=sel[0])
@@ -119,10 +121,11 @@ class RibbonUI(win.Window):
 		self.dir = cmds.radioButtonGrp(self.widgets["directionRBG"], q=True, sl=True )
 		print("dir: %s"%self.dir)
 		self.centerPos = cmds.floatSliderGrp(self.widgets["centerPosFSG"], q=True, v=True )
+		self.follicleGrpList = []
 
 #-----------make sure the num of divisions is at least 1
-#-----------create the nurbs plane in the correct axis (just make the plane in the axis and figure out how to rotate joint local rotational axes to match it)
-#-----------or get pre-existing surface
+#-----------create the nurbs plane in the correct axis (just make the plane in the axis and figure out how to rotate joint local rotational axes to match it) DON'T WORRY ABOUT THIS SO MUCH (IT'S HIDDEN), WORRY ABOUT THE CONTROLS BEING ORIENTED CORRECTLY!!!
+
 		if self.own == 0:
 			self.dir = 2
 		if self.dir == 1:
@@ -140,7 +143,7 @@ class RibbonUI(win.Window):
 		# 	axis = [0, 1, 0]
 		# elif self.axis  == 3:
 		# 	axis = [0, 0, 1]
-									
+
 		if self.own == 0:
 			width = self.height/self.ratio
 			#create the nurbsPlane
@@ -174,9 +177,17 @@ class RibbonUI(win.Window):
 			#create joint and parent to follicle
 			jointName = "%s_fol%s_JNT"%(self.name, x)
 #---------have to figure out how to orient this correctly (just translate and rotate the joints (or the controls they're under))
+			#create joint control? then move the control and the joint under it to the correct rot and pos
 			folPos = cmds.xform(follicle, q=True, ws=True, t=True)
-			folJoint = cmds.joint(n=jointName, p=folPos)
+			folRot = cmds.xform(follicle, q=True, ws=True, ro=True)
+			cmds.select(cl=True)
+			folJoint = cmds.joint(n=jointName, p=(0,0,0))
+			folGroup = cmds.group(folJoint, n="%s_GRP"%folJoint) #this could become control for the joint
+			cmds.xform(folGroup, a=True, ws=True, t=folPos)
+			cmds.xform(folGroup, a=True ,ws=True, ro=folRot)
 			self.follicleJntList.append(folJoint)
+			self.follicleGrpList.append(folGroup)
+			cmds.parent(folGroup, follicle)
 
 		#now create the control structure for the ribbon
 		basePosRaw = cmds.xform(self.follicleJntList[0], ws=True, q=True, t=True)
@@ -187,7 +198,8 @@ class RibbonUI(win.Window):
 		#find the center position
 		ratio = self.centerPos #number 0-1, .5 is the middle
 
-#-----------this is where I should use the pointOnSurface?  or a follicle (which I'll then delete) to find the position and rotation of the midpoint
+#---------------- now just need to feed adjusted uv pos of mid into "alignToUV"
+#---------------- here i should align each top, mid, end to the UV pos I want. . .
 		midVec = ((baseVec + topVec)/2)*(ratio*2)
 
 		#create ctrl structure
@@ -201,8 +213,8 @@ class RibbonUI(win.Window):
 
 #-----------create some options with switches for how things aim, etc at each other
 #--------deal with axis stuff below
-#-------align these controls to the shape of the surface we're using (either g.o. them or use a follicle then delete it, or get surface info)
 #-------then down below we need to use object space to move the locators
+#--------below must figure out how to parent the up locs to controls? ???
 		#for each of "base", "mid", "top" create the control structure
 		for i in range(3):
 			groupName = "%s_%s_GRP"%(self.name, prefixList[i])
