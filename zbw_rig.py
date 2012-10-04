@@ -8,7 +8,6 @@
 ########################
 
 import maya.cmds as cmds
-import zbw_rig as rig
 import math
 import maya.OpenMaya as om
 
@@ -20,15 +19,47 @@ def getTwoSelection():
 		cmds.error("you haven't selected two objects")
 	return objs
 
-########### good  ###########
 def getSelection():
 	"""gets selected objs and returns a tuple of selections in order"""
 	objs = cmds.ls(sl=True)
 	return objs
 
-############### good #################
-def follicle(surface="none", folName="none", u=0.5, v=0.5, *args):
+def jointFromList(xformList=[], orient="xyz", secAxis="zup", strip="", suffix="", *args):
+    """
+    uses the xformlist arg to create a joint chain in order.
+    Arguments: xformList (a list), orient ("xyz", etc), secAxis ("xup", "zdown", etc), strip (string to strip off), suffix (string to add to the joints)
+    """
+    jointList = []
 
+    #if no list is provided, get the list from selection order
+    if not xformList:
+        sel = getSelection()
+
+        if sel:
+            xformList = sel
+        #if no list && no selection then throw error
+        else:
+            cmds.error("you must provide a list of transforms or have the transforms selected in order")
+
+    #clear selection
+    cmds.select(cl=True)
+    #for each thing in the list create a joint at that location (they'll be parented to the previous)
+    for xform in xformList:
+        xformPos = cmds.xform(xform, q=True, ws=True, t=True)
+        jointName = "%s%s"%(xform.rstrip(strip), suffix)
+        thisJoint = cmds.joint(n=jointName, p=xformPos)
+        jointList.append(thisJoint)
+
+    #now orient the joint chain based on args and return a list of the joints
+    cmds.joint(jointList[0], e=True, ch=True, oj=orient, sao=secAxis)
+    return(jointList)
+
+
+def follicle(surface="none", folName="none", u=0.5, v=0.5, *args):
+	"""
+	creates a follicle on a surface based on the uv input.
+	Args are: surface, folName, u, v
+	"""
 #------------do a bit more checking here to make sure the shapes, numbers etc work out
 	if surface=="none":
 		#decide if surface is polymesh or nurbsSurface
@@ -75,8 +106,17 @@ def follicle(surface="none", folName="none", u=0.5, v=0.5, *args):
 
 	return(folXform, folShape)
 
+def axisToVector(axis="+x"):
+	"""
+	takes an arg ("+x", "-x", "+y", "-y", "+z", "-z") and converts it to a vector (ex. (1,0,0))
+	"""
+	axisDict = {"+x":(1,0,0), "-x":(-1,0,0), "+y":(0,1,0), "-y":(0,-1,0), "+z":(0,0,1), "-z":(0,0,-1)}
+	if axis in axisDict.keys():
+		return(axisDict[axis])
+	else:
+		cmds.error("you need to enter an axis (i.e. '+x' or '-x'")
 
-###########  good but needs more objects ############
+
 def createControl(name,type, axis="x", color="darkBlue", *args):
 	"""creates control named by first arg, at origin. shape is determined by second arg: "cube", "octogon", "sphere", "diamond", third arg can be 'x', 'y' or 'z' and is the axis along which the control lies. The colors are: 'lightBlue', 'darkGreen', 'lightPurple', 'yellow', 'darkPurple', 'pink', 'blue', 'purple', 'lightGreen', 'black', 'orange', 'white', 'darkYellow', 'brown', 'lightYellow', 'darkBlue', 'royalBlue', 'darkBrown', 'lightRed', 'medBlue', 'lightBrown', 'darkRed', 'yellowGreen', 'medGreen', 'green', 'red'"""
 	colors = {}
@@ -151,7 +191,6 @@ def createMessage(host="none", attr="none", target="none", *args):
 	cmds.connectAttr("%s.message"%target, "%s.%s"%(host, attr))
 	return("%s.%s"%(host, attr))
 
-############# good ###############
 def alignToUV(targetObj="none", sourceObj="none", sourceU=0.0, sourceV=0.0, mainAxis="+z", secAxis="+x", UorV="v"):
 	"""
 	inputs should be 1. targetObj 2. sourceObj 3. sourceU 4. sourceV 5. mainAxis(lowerCase, + or -, i.e."-x" 8. secAxis (lowcase, + or -) 7, UorV ("u" or "v" for the direction along surface for the sec axis)
@@ -166,8 +205,8 @@ def alignToUV(targetObj="none", sourceObj="none", sourceU=0.0, sourceV=0.0, main
 
 	#get normal, tanU and tanV at selected UV position on source surface
 	tanV = cmds.pointOnSurface(sourceObj, u=sourceU, v=sourceV, tv=True)
-	tanU = cmds.pointOnSurface(targetObj, u=sourceU, v=sourceV, tu=True)
-	norm = cmds.pointOnSurface(targetObj, u=sourceU, v=sourceV, nn=True)
+	tanU = cmds.pointOnSurface(sourceObj, u=sourceU, v=sourceV, tu=True)
+	norm = cmds.pointOnSurface(sourceObj, u=sourceU, v=sourceV, nn=True)
 
 	#decide where up axis is on normal constraint, u or v tangent
 	if UorV == "v":
@@ -179,7 +218,6 @@ def alignToUV(targetObj="none", sourceObj="none", sourceU=0.0, sourceV=0.0, main
 	nc = cmds.normalConstraint(sourceObj, targetObj, aimVector=axisDict[mainAxis], upVector=axisDict[secAxis], worldUpVector=(wup))
 	cmds.delete(nc) #delete constraint
 
-#############  good  #############
 def groupOrient(target='none',orig='none', group="GRP"):
 	"""groups the second object and snaps the group to the second (point and orient). The group arg is to name the suffix you want the group to have (default is '_GRP'"""
 	if (target == "none"):
@@ -196,7 +234,6 @@ def groupOrient(target='none',orig='none', group="GRP"):
 	cmds.delete(oc)
 	cmds.select(clear=True)
 
-#########  good ###########
 def stripToRotate(first="none", *args):
 	attrs = ["tx", "ty", "tz", "sx", "sy", "sz", "visibility"]
 	objs = []
@@ -213,8 +250,6 @@ def stripToRotate(first="none", *args):
 			objAttr = me + "." + attr
 			cmds.setAttr(objAttr, lock=True, k=False)
 
-
-############ good ###########
 def stripToTranslate(first="none", *args):
 	"""strips for all selected or entered as args, sets all attrs but translate to locked and hidden"""
 	attrs = ["rx", "ry", "rz", "sx", "sy", "sz", "visibility"]
@@ -232,8 +267,6 @@ def stripToTranslate(first="none", *args):
 			objAttr = me + "." + attr
 			cmds.setAttr(objAttr, lock=True, k=False)
 
-
-############ good ###########
 def stripToRotateTranslate(first="none", *args):
 	"""strips for all selected or entered as args, sets all attrs but translate to locked and hidden"""
 	attrs = ["sx", "sy", "sz", "visibility"]
@@ -266,8 +299,6 @@ def lockTranslate(first="none", *args):
 			objAttr = me + "." + attr
 			cmds.setAttr(objAttr, lock=True)
 
-
-############## good ##################
 def stripTransforms(first="none", *args):
 	"""locks and hides all transforms from channel box. can call multiple objs as arguments or use selection of objects"""
 	attrs = ["rx", "ry", "rz", "tx", "ty", "tz", "sx", "sy", "sz", "visibility"]
@@ -301,15 +332,13 @@ def restoreTransforms(first="none", *args):
 			objAttr = me + "." + attr
 			cmds.setAttr(objAttr, lock=False, k=True)
 
-##############  good  ##########
 def createAdd(name, input1, input2):
-	"""creates an addDoubleLinear node with name as the only argument"""
+	"""creates an addDoubleLinear node with name, object.attr, object.attr as args"""
 	adl = cmds.shadingNode("addDoubleLinear", asUtility=True, name=name)
 	cmds.connectAttr(input1, "%s.input1"%adl)
 	cmds.connectAttr(input2, "%s.input2"%adl)
 	return(adl)
 
-##############  good ##################
 def blendRotation(blend="none", sourceA="none", sourceB="none", target="none", sourceValue="none"):
 	#add input and *args?
 	"""name is first arg, then three objects. Blends rotation from first two selected into third selected. SourceValue (last input) is for the driving obj.attr. First source is active at '1', second at '2'"""
@@ -395,28 +424,28 @@ def blendScale(blend="none", sourceA="none", sourceB="none", target="none", sour
 	return(blend)
 
 
-def colorControl(color="none", *args):
-	"""enter a color (red, blue, green, yellow, dkRed, dkBlue, dkGreen, dkYellow, pink, ltBlue, ltGreen, ltYellow, black, purple), then objs or selection"""
-	if color == "none":
-		cmds.error("must choose a color to use 'colorControl'")
-	#create dictionary
-	colors = {"red":13}
-	if args == ():
-		args = getSelection()
-	for obj in args:
-		#get shape node
-		#check to make sure there is a shape node
-		#set coloroverride to 1
-		#set color to color value of dict
-		pass
+# def colorControl(color="none", *args):
+# 	"""enter a color (red, blue, green, yellow, dkRed, dkBlue, dkGreen, dkYellow, pink, ltBlue, ltGreen, ltYellow, black, purple), then objs or selection"""
+# 	if color == "none":
+# 		cmds.error("must choose a color to use 'colorControl'")
+# 	#create dictionary
+# 	colors = {"red":13}
+# 	if args == ():
+# 		args = getSelection()
+# 	for obj in args:
+# 		#get shape node
+# 		#check to make sure there is a shape node
+# 		#set coloroverride to 1
+# 		#set color to color value of dict
+# 		pass
 
 
-def standInGeo():
-##  check that there is a next joint
-##  measure distance to next joint?
-##	create geo that is scaled to that measurement
-##	snap the geo to the joint
-	pass
+# def standInGeo():
+# ##  check that there is a next joint
+# ##  measure distance to next joint?
+# ##	create geo that is scaled to that measurement
+# ##	snap the geo to the joint
+# 	pass
 
 def addGroupAbove(obj="none", suff="none", *args):
 	"""name of existing obj, new group suffix. New group will be oriented to the object BELOW it"""
@@ -452,35 +481,33 @@ def reverseSetup(inAttr, strAttr, revAttr, rName, *args):
 	cmds.connectAttr(rOut, revAttr)
 	cmds.select(cl=True)
 
-def addExpression():
-##    expr = "code goes here"
-##    obj = []
-##    cmds.expression(object=obj, string=expr)
-	pass
+# def addExpression():
+# ##    expr = "code goes here"
+# ##    obj = []
+# ##    cmds.expression(object=obj, string=expr)
+# 	pass
 
-def snapToVertex():
-##    get the selection of vertex (flatten it?)
-##    get the worldspace location of the vertex
-##    move the obj to the location of the vertex
-	pass
+# def snapToVertex():
+# ##    get the selection of vertex (flatten it?)
+# ##    get the worldspace location of the vertex
+# ##    move the obj to the location of the vertex
+# 	pass
 
-def nameTypeSelection():
-##    get wildcard selection and type selection
-##    loop selection to select add
-	pass
+# def nameTypeSelection():
+# ##    get wildcard selection and type selection
+# ##    loop selection to select add
+# 	pass
 
-def createQSS(name="none", *args):
-##    if name == "none":
-##        cmds.error("you must enter a name and a selection (either manual or as arguments")
-##    else:
-##        for arg in args:
+# def createQSS(name="none", *args):
+# ##    if name == "none":
+# ##        cmds.error("you must enter a name and a selection (either manual or as arguments")
+# ##    else:
+# ##        for arg in args:
 
-##    get the objects (*args)
-##    create QSS using either selection or *args
-	pass
+# ##    get the objects (*args)
+# ##    create QSS using either selection or *args
+# 	pass
 
-
-##########  good  #############
 def measureDistance(mName="none", *args):
 	"""first the name of the measure node, then the 2 objects ORRRR select the two objects and run (will give name 'distanceBetween'"""
 	objs = []
@@ -511,7 +538,6 @@ def measureDistance(mName="none", *args):
 	cmds.select(clear=True)
 	return(dist)
 
-#############  good ##############
 def scaleStretchIK(limbName="none", ikTop="none", ikMid="none", ikLow="none", jntMeasure="none", IKMeasure="none", IKCtrl="none", axis="none", *args):
 	"""creates a stretch setup for 3 joint IK chain. Inputs (strings) are the limbName, 3 ik joints (top to bottom), the measure input for the whole chain (add up from measure joints), the measure for the ikCtrl, the ik handle or ctrl (which must have 'scaleMin', 'upScale' and 'lowScale' attrs, the axis letter. Returns . . . """
 
@@ -553,7 +579,6 @@ def scaleStretchIK(limbName="none", ikTop="none", ikMid="none", ikLow="none", jn
 
 	return(ratioMult, defaultMult, defaultBlend, conditional, upScaleMult, loScaleMult)
 
-######### good ###########
 def translateStretchIK(limbName="none", ikTop="none", ikMid="none", ikLow="none", jntMeasure="none", IKMeasure="none", IKCtrl="none", axis="none", posNeg="none", *args):
 	"""creates a stretch setup for 3 joint IK chain. Inputs (strings) are the limbName, 3 ik joints (top to bottom), the measure input for the whole chain (add up from measure joints?), the measure for the ikCtrl, the ik handle or ctrl (which must have 'scaleMin' attr, the axis letter, and PosNeg, which is +1 or -1 (minus for things in negative direction/mirror). Returns . . . """
 	#set up the ratio of ctrl to measure
@@ -645,14 +670,14 @@ def translateStretchIK(limbName="none", ikTop="none", ikMid="none", ikLow="none"
 
 	return(ratioMult, topFactorMult, lowFactorMult, topMin, topMax, lowMin, lowMax, topClamp, lowClamp)
 
-def curveInfo():
-	pass
+# def curveInfo():
+# 	pass
 
-def attachToCurve():
-	pass
+# def attachToCurve():
+# 	pass
 
-def jointCleanUp():
-	pass
+# def jointCleanUp():
+# 	pass
 ##    OR select top joint, unparent child, zero rots, parent back (for multiple children)?
 ##    zero rotations
 ##    parent child back to parent
