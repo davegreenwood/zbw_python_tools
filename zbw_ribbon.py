@@ -4,7 +4,7 @@
 #contact: zeth@catbuks.com, www.williework.blogspot.com
 #date modified: 09/23/12
 #
-#notes: calls the class that creates the ribbon. The UI has options for a few things . . . .
+#notes: calls the class that creates the ribbon (instance is "ribbon"). The UI has options for a few things . . . .
 #call with: import zbw_ribbon; zbw_ribbon.zbw_ribbon()
 ########################
 
@@ -190,22 +190,23 @@ class RibbonUI(win.Window):
 			cmds.parent(folGroup, follicle)
 
 		#now create the control structure for the ribbon
-		basePosRaw = cmds.xform(self.follicleJntList[0], ws=True, q=True, t=True)
-		topPosRaw = cmds.xform(self.follicleJntList[self.numJoints], ws=True, q=True, t=True)
-		baseVec = om.MVector(basePosRaw[0], basePosRaw[1], basePosRaw[2])
-		topVec = om.MVector(topPosRaw[0], topPosRaw[1], topPosRaw[2])
+		# basePosRaw = cmds.xform(self.follicleJntList[0], ws=True, q=True, t=True)
+		# topPosRaw = cmds.xform(self.follicleJntList[self.numJoints], ws=True, q=True, t=True)
+		# baseVec = om.MVector(basePosRaw[0], basePosRaw[1], basePosRaw[2])
+		# topVec = om.MVector(topPosRaw[0], topPosRaw[1], topPosRaw[2])
 
 		#find the center position
 		ratio = self.centerPos #number 0-1, .5 is the middle
 
 #---------------- now just need to feed adjusted uv pos of mid into "alignToUV"
 #---------------- here i should align each top, mid, end to the UV pos I want. . .
-		midVec = ((baseVec + topVec)/2)*(ratio*2)
+		midUV = 0.5 * 2 * ratio
 
 		#create ctrl structure
 		prefixList = ["base", "mid", "top"]
+		uvList = [0.0, midUV, 1.0]
 		groupList = []
-		vecList = [baseVec, midVec, topVec]
+		# vecList = [baseVec, midVec, topVec]
 		locList = []
 		upLocList = []
 		ctrlList = []
@@ -220,43 +221,50 @@ class RibbonUI(win.Window):
 			groupName = "%s_%s_GRP"%(self.name, prefixList[i])
 			groupList.append(groupName)
 
-			vecName = "%sVec"%prefixList[i]
-			vecList.append(vecName)
-
+			# vecName = "%sVec"%prefixList[i]
+			# vecList.append(vecName)
+#----------------create the whole setup at 000, then align the top group
 			#create group
 			cmds.group(empty=True, n=groupName)
-			cmds.xform(groupName, ws=True, t=[vecList[i][0], vecList[i][1], vecList[i][2]])
+
+			thisPos = cmds.xform(groupName, ws=True, q=True, t=True)
 
 			#create and parent constraint locator
 			locName = "%s_%s_constr_LOC"%(self.name, prefixList[i])
 			locList.append(locName)
 
 			cmds.spaceLocator(n=locName)
-			cmds.xform(locName, ws=True, t=[vecList[i][0], vecList[i][1], vecList[i][2]])
+			cmds.xform(locName, ws=True, t=(thisPos[0], thisPos[1], thisPos[2]))
 
 			cmds.parent(locName, groupName)
+
+			#create a parent constraint locator under the aim locator
 
 			#create up locator
 			upLocName = "%s_%s_up_LOC"%(self.name, prefixList[i])
 			upLocList.append(upLocName)
 
 			cmds.spaceLocator(n=upLocName)
-			cmds.xform(upLocName, ws=True, t=[vecList[i][0], vecList[i][1], vecList[i][2]-1])
+			#create option for what direction the up vec is?
+#----------------axis here
+			cmds.xform(upLocName, ws=True, t=[0,0,-1])
 			cmds.parent(upLocName, groupName)
 
 			#create controls
 			ctrlName = "%s_%s_CTRL"%(self.name, prefixList[i])
 			ctrlList.append(ctrlName)
-
+#----------------axis here
 			cmds.circle(nr=(0, 1, 0), r=(self.height/10*3), n=ctrlName)
-			cmds.xform(ctrlName, ws=True, t=[vecList[i][0], vecList[i][1], vecList[i][2]])
 			cmds.parent(ctrlName, locName)
 
 			#create control joints (will already be parented to ctrl)
 			jntName = "%s_%s_ctrl_JNT"%(self.name, prefixList[i])
 			ctrlJntList.append(jntName)
 
-			test = cmds.joint(n=jntName, p=(vecList[i][0], vecList[i][1], vecList[i][2]))
+			ctrlJoint = cmds.joint(n=jntName, p=(0,0,0))
+#----------------axis here
+			#align group to surface
+			rig.alignToUV(targetObj=groupName, sourceObj=self.ribbonName, sourceU=0.5, sourceV=uvList[i], mainAxis="+z", secAxis="+y", UorV="v")
 
 		#now bind the nurbs geo
 		cmds.select(cl=True)
@@ -269,6 +277,11 @@ class RibbonUI(win.Window):
 
 #-------here add in the constraints to make this work properly. . . on each control have it tell what to aim at? lock these or not (depends on whether it's FK or not?)
 #-------also add in the FK option here, too. . .
+
+		#base aim constrain to look at center
+		#top aim constrain to look at center
+		#mid parent constrain to either?, aim to either, point to either?
+
 
 		#start packaging stuff up
 #-------hide the locators
