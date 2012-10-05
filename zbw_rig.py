@@ -116,9 +116,65 @@ def axisToVector(axis="+x"):
 	else:
 		cmds.error("you need to enter an axis (i.e. '+x' or '-x'")
 
+def fkChain(ctrlType="circle", color="red", axis="x", *args):
+	"""
+	puts a correctly oriented control onto each joint of selected chain. Will name the controls after the joint names and parent them according to the joint order
+	Select the top joint of a chain and call fkChain(ARGS)
+	Arguments: ctrlType ("sphere", "circle", "cube", etc), color ("red", "darkRed",etc. See zbw_rig.createControl for full list), axis ("x", "y", "x")
+	"""
 
-def createControl(name,type, axis="x", color="darkBlue", *args):
-	"""creates control named by first arg, at origin. shape is determined by second arg: "cube", "octogon", "sphere", "diamond", third arg can be 'x', 'y' or 'z' and is the axis along which the control lies. The colors are: 'lightBlue', 'darkGreen', 'lightPurple', 'yellow', 'darkPurple', 'pink', 'blue', 'purple', 'lightGreen', 'black', 'orange', 'white', 'darkYellow', 'brown', 'lightYellow', 'darkBlue', 'royalBlue', 'darkBrown', 'lightRed', 'medBlue', 'lightBrown', 'darkRed', 'yellowGreen', 'medGreen', 'green', 'red'"""
+	#get the selected joint's chain of joints
+	sel = cmds.ls(sl=True, type="joint")
+
+	#initialize lists
+	ctrlList = []
+	groupList = []
+
+	#for now just do one chain
+	if len(sel) != 1:
+		cmds.error("please select only the top level joint of one chain")
+	else:
+		#get the hierarchy of just joints
+		allChain = cmds.select(sel[0], hi=True)
+		chain = cmds.ls(sl=True, type="joint")
+		chainSize = len(chain)
+
+		for jnt in chain:
+			#get the rot order
+			rotOrder = cmds.getAttr("%s.rotateOrder"%jnt)
+
+			#control name
+			ctrlName =  jnt + "_CTRL"
+
+			#create control
+			ctrl = createControl(ctrlName, ctrlType, axis, color)
+
+			#snap that control to the joint (group orient)
+			groupOrient(jnt, ctrl, "GRP")
+			group = ctrl + "_GRP"
+
+			#orient constrain the joint to the control
+			cmds.orientConstraint(ctrl, jnt)
+
+			#set rotation order for the control and group
+			cmds.setAttr("%s.rotateOrder"%ctrl, rotOrder)
+			cmds.setAttr("%s.rotateOrder"%group, rotOrder)
+
+			#add the controls and groups to lists to keep their order
+			ctrlList.append(ctrl)
+			groupList.append(group)
+
+
+		#parent up the groups and controls correctly
+		for i in range(chainSize-1, 0, -1):
+			cmds.parent(groupList[i], ctrlList[i-1])
+
+
+def createControl(name="default",type="circle", axis="x", color="darkBlue", *args):
+	"""
+	creates control named by first arg, at origin. shape is determined by second arg: "cube", "octogon", "sphere", "diamond", third arg can be 'x',, 'y', , 'z'  and is the axis along which the control lies. The colors are: 'lightBlue', 'darkGreen', 'lightPurple', 'yellow', 'darkPurple', 'pink', 'blue', 'purple', 'lightGreen', 'black', 'orange', 'white', 'darkYellow', 'brown', 'lightYellow', 'darkBlue', 'royalBlue', 'darkBrown', 'lightRed', 'medBlue', 'lightBrown', 'darkRed', 'yellowGreen', 'medGreen', 'green', 'red'
+	Arguments: name, type, axis, color
+	"""
 	colors = {}
 	colors["red"]=13
 	colors["blue"]=6
@@ -158,7 +214,10 @@ def createControl(name,type, axis="x", color="darkBlue", *args):
 		cmds.warning('createControl: you entered an incorrect axis. Must be x, y or z')
 
 	#-------------------------do this from dictionary, that way it's easier to control the flow to error or return
-	if type == "cube":
+	if type == "circle":
+		cmds.circle(n=name, nr= (1,0,0))
+
+	elif type == "cube":
 		cmds.curve(n=name, d=1, p=[[-0.34095753069042323, -1.0031016006564133, 1.0031016006564133], [-0.34095753069042323, 1.0031016006564133, 1.0031016006564133], [0.34095753069042323, 1.0031016006564133, 1.0031016006564133], [0.34095753069042323, -1.0031016006564133, 1.0031016006564133], [-0.34095753069042323, -1.0031016006564133, 1.0031016006564133], [-0.34095753069042323, -1.0031016006564133, -1.0031016006564133], [-0.34095753069042323, 1.0031016006564133, -1.0031016006564133], [-0.34095753069042323, 1.0031016006564133, 1.0031016006564133], [0.34095753069042323, 1.0031016006564133, 1.0031016006564133], [0.34095753069042323, 1.0031016006564133, -1.0031016006564133], [0.34095753069042323, -1.0031016006564133, -1.0031016006564133], [0.34095753069042323, -1.0031016006564133, 1.0031016006564133], [0.34095753069042323, 1.0031016006564133, 1.0031016006564133], [0.34095753069042323, 1.0031016006564133, -1.0031016006564133], [-0.34095753069042323, 1.0031016006564133, -1.0031016006564133], [-0.34095753069042323, -1.0031016006564133, -1.0031016006564133], [0.34095753069042323, -1.0031016006564133, -1.0031016006564133]])
 
 	elif type == "octagon":
@@ -219,7 +278,10 @@ def alignToUV(targetObj="none", sourceObj="none", sourceU=0.0, sourceV=0.0, main
 	cmds.delete(nc) #delete constraint
 
 def groupOrient(target='none',orig='none', group="GRP"):
-	"""groups the second object and snaps the group to the second (point and orient). The group arg is to name the suffix you want the group to have (default is '_GRP'"""
+	"""
+	groups the second object and snaps the group to the second (point and orient). The group arg is to name the suffix you want the group to have (default is '_GRP')
+	Arguments: target (to be constrained to), orig (obj to move), group (suffix for group)
+	"""
 	if (target == "none"):
 		sel = getTwoSelection()
 		target = sel[0]
