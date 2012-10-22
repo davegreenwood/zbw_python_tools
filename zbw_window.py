@@ -46,7 +46,7 @@ class Window(object):
 
 		#add buttons
 		self.widgets["applyCloseButton"] = cmds.button(w=butWidth, h=30, l='Apply and Close', c=partial(self.action, 1))
-		self.widgets["applyButton"] = cmds.button(w=butWidth, h= 30, l='apply', c=partial(self.action, 0))
+		self.widgets["applyButton"] = cmds.button(w=butWidth, h= 30, l='Apply', c=partial(self.action, 0))
 		self.widgets['closeButton'] = cmds.button(w=butWidth, h=30, l="close window", c=self.closeWindow)
 
 		cmds.formLayout(self.widgets["formLO"], e=True, attachForm=[(self.widgets["applyCloseButton"], 'bottom', 5), (self.widgets["applyCloseButton"], 'left', 5)])
