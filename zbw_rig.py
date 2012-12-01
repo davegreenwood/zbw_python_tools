@@ -1,7 +1,7 @@
 ########################
 #file: zbw_rig.py
 #author: zeth willie
-#contact: zeth@catbuks.com, www.williework.blogspot.com, https://github.com/zethwillie
+#contact: zeth@catbuks.com, www.williework.blogspot.com
 #date modified: 09/23/12
 #
 #notes: helper scripts for rigging
@@ -173,7 +173,7 @@ def fkChain(ctrlType="circle", color="red", axis="x", *args):
 def createControl(name="default",type="circle", axis="x", color="darkBlue", *args):
 	"""
 	creates control namemed by first arg, at origin.
-	shape is determined by second arg: "cube", "octogon", "sphere", "diamond", "barbell",
+	shape is determined by second arg: "cube", "octagon", "sphere", "diamond", "barbell",
 	third arg can be 'x',, 'y', , 'z'  and is the axis along which the control lies.
 	The colors are: 'lightBlue', 'darkGreen', 'lightPurple', 'yellow', 'darkPurple', 'pink', 'blue', 'purple', 'lightGreen', 'black', 'orange', 'white', 'darkYellow', 'brown', 'lightYellow', 'darkBlue', 'royalBlue', 'darkBrown', 'lightRed', 'medBlue', 'lightBrown', 'darkRed', 'yellowGreen', 'medGreen', 'green', 'red'
 	Arguments: name, type, axis, color
@@ -302,6 +302,8 @@ def groupOrient(target='none',orig='none', group="GRP"):
 	cmds.delete(pc)
 	cmds.delete(oc)
 	cmds.select(clear=True)
+
+	return(grpName)
 
 def stripToRotate(first="none", *args):
 	attrs = ["tx", "ty", "tz", "sx", "sy", "sz", "visibility"]
