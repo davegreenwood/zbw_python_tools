@@ -14,6 +14,9 @@ import maya.OpenMaya as om
 import maya.cmds as cmds
 
 
+#----------------create a bezier version of this (4 divisions, don't need control joints, create cluster setups and attrs to use them, create aim constraints for end joints)
+
+
 #----------figure out how to make midpoint adjustable (visually???) . . .
 class RibbonUI(win.Window):
 	def __init__(self):
