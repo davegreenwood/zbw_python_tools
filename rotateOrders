@@ -12,5 +12,5 @@ yzx - rotate y affects nothing else
 	
 
 	 Basically first axis is a much used axis, down the chain if necessary
-	 Third is dominant axis as action
+	 Third is dominant axis of action
 	 Second should be the LEAST used axis for sure (this is the one that will create gimble lock with the first)
