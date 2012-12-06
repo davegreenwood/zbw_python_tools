@@ -5,9 +5,9 @@ widgets = {}
 def softModDeformerUI():
 	if cmds.window("softModWin", exists = True):
 		cmds.deleteUI("softModWin")
-	widgets["window"] = cmds.window("softModWin", t="SoftMod Deformer", w=300, h=100)
+	widgets["window"] = cmds.window("softModWin", t="SoftMod Deformer", w=300, h=120)
 
-	widgets["columnLO"] = cmds.columnLayout(w=300, h=100)
+	widgets["columnLO"] = cmds.columnLayout(w=300, h=120)
 	cmds.separator(h=10)
 	widgets["nameTFG"] = cmds.textFieldGrp(l="Deformer Name", w=300, cw=[(1,100),(2,190)], cal=[(1,"left"), (2, "left")])
 	widgets["firstVertCBG"] = cmds.checkBoxGrp(l="Use only 1st vert (vs. avg pos)", v1=0, cw=[(1,200)], cal=[(1,"left"), (2,"left")])
