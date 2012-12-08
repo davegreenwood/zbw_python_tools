@@ -1,0 +1,3 @@
+#TO-DO----------------also think about selecting all the cards. . . for each, run closestPointOnSurface function for the dummy geo, create a follicle at the closest point(UV) and parent it to that. . . .
+
+#TO-DO----------------for ribbon spine with controls, parent the group below to the control (joints are parented under the control). Then you can put a "local" control onto the joint to do the up/down stuff for each control
