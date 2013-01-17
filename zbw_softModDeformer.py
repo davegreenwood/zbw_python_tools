@@ -1,5 +1,6 @@
 import maya.cmds as cmds
 
+#TO-DO----------------put the softmod under a follicle that is attached to the skin
 widgets = {}
 
 def softModDeformerUI():
@@ -15,11 +16,11 @@ def softModDeformerUI():
 	#entry for scale size of controller?
 	#entry for type of control? color of control?
 	#text for instructions
-	widgets["button"] = cmds.button(l="Create Deformer", w=300, h=50, c=softModDeformer)
+	widgets["button"] = cmds.button(l="Create Deformer", w=300, h=50, c=softModDeformerDo)
 
 	cmds.showWindow(widgets["window"])
 
-def softModDeformer(*args):
+def softModDeformerDo(*args):
 
 	#get deformer name
 	defName = cmds.textFieldGrp(widgets["nameTFG"], tx=True, q=True)
@@ -102,7 +103,7 @@ def softModDeformer(*args):
 	#select the control to wrap up
 	cmds.select(control)
 
-def zbw_softModDeformer():
+def softModDeformer():
 	softModDeformerUI()
 
 

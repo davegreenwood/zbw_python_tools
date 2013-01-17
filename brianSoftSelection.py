@@ -4,6 +4,7 @@ import maya.cmds as cmds
 #----------------option to place your own control somewhere OR have it automatically place on closest point on mesh
 #----------------naming conventions for objects and controls (consequently clusters)
 #----------------deal with window for this
+#TO-DO----------------put it under a follicle (at least option for that)
 
 
 def softSelection():
