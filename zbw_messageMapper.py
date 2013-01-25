@@ -307,5 +307,5 @@ def zbw_mmChangeConnectObj(base, attr, obj, *args):
     cmds.deleteUI("mmRCListLayout")
     zbw_mmListCurrentMessages("mmListMessages")
 
-def zbw_messageMapper():
+def messageMapper():
     zbw_mmUI()
