@@ -53,27 +53,29 @@ def origScale(*args):
 	cmds.floatFieldGrp(widgets["trackerFFG"], e=True, v1=scaleVal*currScale)
 
 	sel = cmds.ls(sl=True, type="transform")
-	for obj in sel:
-		#decide on object type
-		objShape = cmds.listRelatives(obj, s=True)
-		shapeType = cmds.objectType(objShape)
+	if sel:
+		for obj in sel:
+			#decide on object type
+			objShape = cmds.listRelatives(obj, s=True)
+			shapeType = cmds.objectType(objShape)
 
-		cmds.select(cl=True)
-		if shapeType == "nurbsSurface" or shapeType == "nurbsCurve":
-			#get the components
-			cvs = cmds.select((obj + ".cv[*]"))
-			cmds.scale(scaleVal, scaleVal, scaleVal)
-		elif shapeType == "mesh":
-			#get the components
-			cvs = cmds.select((obj + ".vtx[*]"))
-			cmds.scale(scaleVal, scaleVal, scaleVal)
-		else:
-			cmds.warning("%s isn't a nurbs or poly object, so it was skipped")
+			cmds.select(cl=True)
+			if shapeType == "nurbsSurface" or shapeType == "nurbsCurve":
+				#get the components
+				cvs = cmds.select((obj + ".cv[*]"))
+				cmds.scale(scaleVal, scaleVal, scaleVal)
+			elif shapeType == "mesh":
+				#get the components
+				cvs = cmds.select((obj + ".vtx[*]"))
+				cmds.scale(scaleVal, scaleVal, scaleVal)
+			else:
+				cmds.warning("%s isn't a nurbs or poly object, so it was skipped")
 
 	#clear and reselect all
-	cmds.select(cl=True)
-	cmds.select(sel)
-	cmds.floatFieldGrp(widgets["scaleFFG"], e=True, v1=scaleVal*100)
+	if sel:
+		cmds.select(cl=True)
+		cmds.select(sel)
+		cmds.floatFieldGrp(widgets["scaleFFG"], e=True, v1=scaleVal*100)
 
 
 def manualScale(*args):
@@ -84,29 +86,30 @@ def manualScale(*args):
 	scaleVal = scalePer/100
 	#scaleShapes
 	sel = cmds.ls(sl=True, type="transform")
-	for obj in sel:
-		#decide on object type
-		objShape = cmds.listRelatives(obj, s=True)
-		shapeType = cmds.objectType(objShape)
+	if sel:
+		for obj in sel:
+			#decide on object type
+			objShape = cmds.listRelatives(obj, s=True)
+			shapeType = cmds.objectType(objShape)
 
-		cmds.select(cl=True)
-		if shapeType == "nurbsSurface" or shapeType == "nurbsCurve":
-			#get the components
-			cvs = cmds.select((obj + ".cv[*]"))
-			cmds.scale(scaleVal, scaleVal, scaleVal)
-		elif shapeType == "mesh":
-			#get the components
-			cvs = cmds.select((obj + ".vtx[*]"))
-			cmds.scale(scaleVal, scaleVal, scaleVal)
-		else:
-			cmds.warning("%s isn't a nurbs or poly object, so it was skipped")
+			cmds.select(cl=True)
+			if shapeType == "nurbsSurface" or shapeType == "nurbsCurve":
+				#get the components
+				cvs = cmds.select((obj + ".cv[*]"))
+				cmds.scale(scaleVal, scaleVal, scaleVal)
+			elif shapeType == "mesh":
+				#get the components
+				cvs = cmds.select((obj + ".vtx[*]"))
+				cmds.scale(scaleVal, scaleVal, scaleVal)
+			else:
+				cmds.warning("%s isn't a nurbs or poly object, so it was skipped")
 
 	#clear and reselect all
-	cmds.select(cl=True)
-	cmds.select(sel)
-
-	newScale = origScale * scaleVal
-	cmds.floatFieldGrp(widgets["trackerFFG"], e=True, v1=newScale)
+	if sel:
+		cmds.select(cl=True)
+		cmds.select(sel)
+		newScale = origScale * scaleVal
+		cmds.floatFieldGrp(widgets["trackerFFG"], e=True, v1=newScale)
 
 def shapeScaleExecute(*args):
 	"""takes the components of the selected obj and scales them according the slider"""
@@ -121,38 +124,39 @@ def shapeScaleExecute(*args):
 	#get the value from the slider
 	scaleVal = cmds.floatSliderGrp(widgets["slider"] , q=True, v=True)
 
-	for obj in sel:
-		#decide on object type
-		objShape = cmds.listRelatives(obj, s=True)
-		shapeType = cmds.objectType(objShape)
+	if sel:
+		for obj in sel:
+			#decide on object type
+			objShape = cmds.listRelatives(obj, s=True)
+			shapeType = cmds.objectType(objShape)
 
-		cmds.select(cl=True)
-		if shapeType == "nurbsSurface" or shapeType == "nurbsCurve":
-			#get the components
-			cvs = cmds.select((obj + ".cv[*]"))
-			cmds.scale(scaleVal, scaleVal, scaleVal)
-			#fix scale adjuster
-			newScale = oldScale * scaleVal
-			cmds.floatFieldGrp(widgets["scaleFFG"], e=True, v1=newScale)
-		elif shapeType == "mesh":
-			#get the components
-			cvs = cmds.select((obj + ".vtx[*]"))
-			cmds.scale(scaleVal, scaleVal, scaleVal)
-			#fix scale adjuster
-			newScale = oldScale * scaleVal
-			cmds.floatFieldGrp(widgets["scaleFFG"], e=True, v1=newScale)
-		else:
-			cmds.warning("%s isn't a nurbs or poly object, so it was skipped")
+			cmds.select(cl=True)
+			if shapeType == "nurbsSurface" or shapeType == "nurbsCurve":
+				#get the components
+				cvs = cmds.select((obj + ".cv[*]"))
+				cmds.scale(scaleVal, scaleVal, scaleVal)
+				#fix scale adjuster
+				newScale = oldScale * scaleVal
+				cmds.floatFieldGrp(widgets["scaleFFG"], e=True, v1=newScale)
+			elif shapeType == "mesh":
+				#get the components
+				cvs = cmds.select((obj + ".vtx[*]"))
+				cmds.scale(scaleVal, scaleVal, scaleVal)
+				#fix scale adjuster
+				newScale = oldScale * scaleVal
+				cmds.floatFieldGrp(widgets["scaleFFG"], e=True, v1=newScale)
+			else:
+				cmds.warning("%s isn't a nurbs or poly object, so it was skipped")
 
 	#reset slider to 1, so we don't stack scalings
 	cmds.floatSliderGrp(widgets["slider"], e=True, v=1)
 
 	#clear and reselect all
-	cmds.select(cl=True)
-	cmds.select(sel)
-
-	newScale = origScale * scaleVal
-	cmds.floatFieldGrp(widgets["trackerFFG"], e=True, v1=newScale)
+	if sel:
+		cmds.select(cl=True)
+		cmds.select(sel)
+		newScale = origScale * scaleVal
+		cmds.floatFieldGrp(widgets["trackerFFG"], e=True, v1=newScale)
 
 def shapeScale():
 	shapeScaleUI()
