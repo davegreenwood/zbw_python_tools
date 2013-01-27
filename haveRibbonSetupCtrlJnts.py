@@ -29,6 +29,6 @@ def ctrlSetup():
 		cmds.parent(groupList[x], ctrlList[x-1])
 
 		#strip to rotateTranslate, then lock the translate of the old control
-		#strip to translate of the new control . . . (lock other channels other than up?)
+		#strip to translate of the new control . . . (lock other channels other than up?2)
 		
 	#TO-DO----------------put a "local" control onto the joint to do the up/down stuff for each control
