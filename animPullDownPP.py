@@ -6,6 +6,13 @@ import math
 from functools import partial
 import maya.mel as mel
 
+#TO-DO----------------revise UI a bit to make it cleaner
+#TO_DO----------------save out the selected controls to get them later
+#TO-DO----------------figure out how to do step keys (step next)
+#TO-DO----------------don't need move up section on UI
+#TO-DO----------------option to use locs to get ws position and rotation!!!! Or maybe not option, maybe they're all done that way (MAYBE JUST USE RP  IN XFORM INSTEAD OF T)
+#TO-DO----------------frame range option? probably not necessary, think of a situation in which you'd need it
+
 #set up UI to enter master controls into list, then enter IK, COG into list
 def animPullDownUI():
     if cmds.window("animPullDownWin",exists=True):
@@ -58,11 +65,6 @@ def animPullDownUI():
 def moveUp(layout, *args):
      """moves the selected text scroll item up one position"""
      pass
-#     #get the selection
-#     sel = cmds.textScrollList(layout, q=True, sii=True)
-#     for item in sel:
-#         if item > 1:
-#
 
 def clearList(layout, *args):
     """clears the list of textFields"""
