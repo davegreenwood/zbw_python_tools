@@ -9,61 +9,87 @@ import maya.mel as mel
 #TO-DO----------------revise UI a bit to make it cleaner
 #TO_DO----------------save out the selected controls to get them later
 #TO-DO----------------figure out how to do step keys (step next)
-#TO-DO----------------don't need move up section on UI
 #TO-DO----------------option to use locs to get ws position and rotation!!!! Or maybe not option, maybe they're all done that way (MAYBE JUST USE RP  IN XFORM INSTEAD OF T)
 #TO-DO----------------frame range option? probably not necessary, think of a situation in which you'd need it
 
 #set up UI to enter master controls into list, then enter IK, COG into list
+widgets = {}
+
 def animPullDownUI():
-    if cmds.window("animPullDownWin",exists=True):
-        cmds.deleteUI("animPullDownWin", window=True)
-        cmds.windowPref("animPullDownWin", remove=True)
 
-    cmds.window("animPullDownWin", w=460, h=300)
-    cmds.rowColumnLayout("mainRC", nc=2)
+    if cmds.window("apdWin",exists=True):
+        cmds.deleteUI("apdWin", window=True)
+        cmds.windowPref("apdWin", remove=True)
 
-    #----------get frame range
+    widgets["win"] = cmds.window("apdWin", t="zbw_pullUpAnim", w=400, h=550)
+
+
+    widgets["tabLO"] = cmds.tabLayout()
+    widgets["mainCLO"] = cmds.columnLayout("SetupControls")
+
+    #----------get frame range?
 
     #master controls layout
-    cmds.frameLayout("zeroFrameLO", l="Zeroed Controls", w=230, h=150)
-    cmds.columnLayout("zeroColumnLO", w=230, h=150)
-    cmds.text("select master control items to zero out")
-    cmds.button("zeroButton", l="add scene objs", w=230, c= partial(getControl, "masterTSL"))
+    widgets["zeroFLO"] = cmds.frameLayout("zeroFrameLO", l="Master Controls", w=400, bgc = (0, 0,0), h=200)
+    widgets["zeroCLO"] = cmds.columnLayout("zeroColumnLO", w=400)
+    cmds.text("Select Master Control Items To Zero Out")
+    widgets["zeroBut"] = cmds.button("zeroButton", l="Add Master CTRLs", bgc = (.8,.8,.6), w=400, h=35, c= partial(getControl, "masterTSL"))
 
-    cmds.rowColumnLayout("zeroRCLO", nc=2, w=230)
-    cmds.button("clearZeroButton", l="clear selected", w=115, c= partial(clearList, "masterTSL"))
-    cmds.button("moveZeroButton", l="move up", w=115, en=False, c= partial(moveUp, "masterTSL"))
-    cmds.setParent("zeroColumnLO")
+    widgets["zeroRCLO"] = cmds.rowColumnLayout("zeroRCLO", nc=2, w=400)
+    widgets["zeroClearBut"] = cmds.button("clearZeroButton", l="Clear Selected", w=200, h=30, bgc=(.8,.6,.6), c= partial(clearList, "masterTSL"))
+#TO-DO----------------make this a "clear all" button???
+    widgets["zeroClearBut"] = cmds.button("moveZeroButton", l="Clear All", w=200, h=30, bgc=(.8,.5,.5), c= partial(clearAll, "zeroTSL"))
+    cmds.setParent(widgets["zeroCLO"])
     cmds.separator(h=10)
-    cmds.textScrollList("masterTSL", nr=8, ams=True, bgc=(.2, .2, .2))
-    #create button to remove selected
-    #create method to move around list (reorder)
-
+    widgets["zeroTSL"] = cmds.textScrollList("masterTSL", nr=4, w=400, h=75, ams=True, bgc=(.2, .2, .2))
 
     #ik items layout
-    cmds.setParent("mainRC")
-    cmds.frameLayout("IKFrameLO", l = "worldSpace Controls", w=230, h=200)
-    cmds.columnLayout("IKColumnLO", w=230, h=150)
-    cmds.text("select world space controls")
-    cmds.button("IKButton", l="add scene objs", w=230, c= partial(getControl, "IKTSL"))
+    cmds.setParent(widgets["mainCLO"])
+    widgets["IKFLO"] = cmds.frameLayout("IKFrameLO", l = "World Space Controls", w=400, bgc=(0,0,0))
+    widgets["IKCLO"] = cmds.columnLayout("IKColumnLO", w=400)
+    cmds.text("Select World Space Controls")
+    widgets["IKBut"] = cmds.button("IKButton", l="Add World Space CTRLs", w=400, h=35, bgc = (.8,.8,.6), c= partial(getControl, "IKTSL"))
 
-    cmds.rowColumnLayout("IKRCLO", nc=2, w=230)
-    cmds.button("clearIKButton", l="clear selected", w=115, c= partial(clearList, "IKTSL"))
-    cmds.button("moveIKButton", l="move up", w=115, en=False, c= partial(moveUp, "masterTSL"))
+    widgets["IKRCLO"] = cmds.rowColumnLayout("IKRCLO", nc=2, w=400)
+    widgets["IKClearSelBut"] = cmds.button("clearIKButton", l="Clear Selected", bgc=(.8,.6,.6), w=200, h=30, c= partial(clearList, "IKTSL"))
+
+    widgets["IKClearAllBut"] = cmds.button("moveIKButton", l="Clear All", w=200, h=30, bgc=(.8,.5,.5), c= partial(clearAll,  "IKTSL"))
     cmds.setParent("IKColumnLO")
     cmds.separator(h=10)
-    cmds.textScrollList("IKTSL", nr=8, ams=True, bgc=(.2, .2, .2))
+    widgets["IKTSL"] = cmds.textScrollList("IKTSL", nr=10, w=400, h=120, ams=True, bgc=(.2, .2, .2))
+    cmds.separator(h=10)
+
 
     #doIt button layout
-    cmds.setParent("animPullDownWin")
-    cmds.columnLayout("doItLayout", w=150, h=100)
-    cmds.button("doItButton", l="zero out master controls!", w=150, bgc = (0,.5,0), c=pullDownAnim)
+    cmds.setParent(widgets["mainCLO"])
+    widgets["doItRCLO"] = cmds.rowColumnLayout("doItLayout", nc=2)
+    widgets["doItBut"] = cmds.button("doItButton", l="Pull Animation Down from Master!", w=300, h=50, bgc = (.4,.8,.4), c=pullDownAnim)
+    widgets["pullBut"] = cmds.button("pullButton", l="Store IK Controls", w=100, h=50, bgc = (.4,.4,.8))
+
+#TO-DO----------------make the button which passes info into the second tab (which will catch selections for IK controls)
+
+    #create second tab
+    cmds.setParent(widgets["tabLO"])
+    widgets["storeCLO"] = cmds.columnLayout("Store Control Names")
+    widgets["storeFL"] = cmds.frameLayout(l="Stored Control Names", w=400)
+    widgets["storeTSL"] = cmds.textScrollList("storeTSL", nr=8, ams=True, bgc=(.2, .2, .2))
+    cmds.separator(h=10)
+    #back up to clo to setup rclo
+    cmds.setParent(widgets["storeCLO"])
+    widgets["storeRCL"] = cmds.rowColumnLayout(nc=2)
+    widgets["storeClearSelBut"] = cmds.button(l="Clear Selected", bgc = (.8,.6,.6), w=200, h=30)
+    widgets["storeClearAllBut"] = cmds.button(l="Clear All", bgc = (.9,.6,.6), w=200, h=30)
+    cmds.setParent(widgets["storeCLO"])
+    cmds.separator(h=10)
+    widgets["storeGetBut"] = cmds.button(l="Add Selected Object Control Name", bgc = (.8,.8,.6), w=400, h=40)
+    cmds.separator(h=10)
+    widgets["storePullBut"] = cmds.button(l="Find and Push These From Under Selected Mstr", bgc = (.6,.9,.6), w=400, h=40)
 
     #showWindow
-    cmds.showWindow("animPullDownWin")
+    cmds.showWindow(widgets["win"])
 
-def moveUp(layout, *args):
-     """moves the selected text scroll item up one position"""
+def clearAll(layout, *args):
+     """clears the selected text scroll list"""
      pass
 
 def clearList(layout, *args):
@@ -87,7 +113,7 @@ def getLocalValues(obj, *args):
     obj_values = []
 
     obj_wRot = cmds.xform(obj, q=True, ws=True, ro=True)
-    obj_wTrans = cmds.xform(obj, q=True, ws=True, t=True)
+    obj_wTrans = cmds.xform(obj, q=True, ws=True, rp=True)
 
     for tval in obj_wTrans:
         obj_values.append(tval)
@@ -108,13 +134,13 @@ def pullDownAnim(*args):
     allControls = []
     
     #get list of master ctrls
-    mChildren = cmds.textScrollList("masterTSL", q=True, ai=True)
+    mChildren = cmds.textScrollList(widgets["zeroTSL"], q=True, ai=True)
     for thisM in mChildren:
         masters.append(thisM)
         allControls.append(thisM)
         
     #get list of world space objects
-    wChildren = cmds.textScrollList("IKTSL", q=True, ai=True)
+    wChildren = cmds.textScrollList(widgets["IKTSL"], q=True, ai=True)
     for thisIK in wChildren:
         worldCtrls.append(thisIK)
         allControls.append(thisIK)
@@ -170,5 +196,3 @@ def pullDownAnim(*args):
 
 def animPullDown():
     animPullDownUI()
-    
-animPullDown()
