@@ -6,13 +6,14 @@ import math
 from functools import partial
 import maya.mel as mel
 
-#TO-DO----------------revise UI a bit to make it cleaner
-#TO_DO----------------save out the selected controls to get them later
+#TO-DO----------------checkbox for using rotate pivot or translate? on master buttons area?
+#TO_DO----------------save out the selected controls to get them later?
 #TO-DO----------------figure out how to do step keys (step next)
-#TO-DO----------------option to use locs to get ws position and rotation!!!! Or maybe not option, maybe they're all done that way (MAYBE JUST USE RP  IN XFORM INSTEAD OF T)
+#TO-DO----------------option to delete keys on master ctrls after its done (checkbox option)
+#TO-DO----------------option to select all objects in world ctrl list, double click in list to select? 
 #TO-DO----------------frame range option? probably not necessary, think of a situation in which you'd need it
+#TO-DO----------------dummy check selections (for clear, grab selected, add to list, etc)
 
-#set up UI to enter master controls into list, then enter IK, COG into list
 widgets = {}
 
 def animPullDownUI():
@@ -30,18 +31,19 @@ def animPullDownUI():
     #----------get frame range?
 
     #master controls layout
-    widgets["zeroFLO"] = cmds.frameLayout("zeroFrameLO", l="Master Controls", w=400, bgc = (0, 0,0), h=200)
+    widgets["zeroFLO"] = cmds.frameLayout("zeroFrameLO", l="Master Controls", w=400, bgc = (0, 0,0), h=210)
     widgets["zeroCLO"] = cmds.columnLayout("zeroColumnLO", w=400)
     cmds.text("Select Master Control Items To Zero Out")
-    widgets["zeroBut"] = cmds.button("zeroButton", l="Add Master CTRLs", bgc = (.8,.8,.6), w=400, h=35, c= partial(getControl, "masterTSL"))
+    widgets["zeroBut"] = cmds.button("zeroButton", l="Add Selected Master CTRLs", bgc = (.8,.8,.6), w=400, h=35, c= partial(getControl, "masterTSL"))
 
     widgets["zeroRCLO"] = cmds.rowColumnLayout("zeroRCLO", nc=2, w=400)
-    widgets["zeroClearBut"] = cmds.button("clearZeroButton", l="Clear Selected", w=200, h=30, bgc=(.8,.6,.6), c= partial(clearList, "masterTSL"))
-#TO-DO----------------make this a "clear all" button???
-    widgets["zeroClearBut"] = cmds.button("moveZeroButton", l="Clear All", w=200, h=30, bgc=(.8,.5,.5), c= partial(clearAll, "zeroTSL"))
+    widgets["zeroClearBut"] = cmds.button("clearZeroButton", l="Clear Selected", w=200, h=20, bgc=(.8,.6,.6), c= partial(clearList, "masterTSL"))
+    widgets["zeroClearBut"] = cmds.button("clearAllZeroButton", l="Clear All", w=200, h=20, bgc=(.8,.5,.5), c= partial(clearAll, "masterTSL"))
+    #widgets["zeroSelBut"] = cmds.button("selZeroButton", l="Select All Masters", w=200, h=20, bgc=(.6,.6,.8), c= partial(selectList, "masterTSL"))
+    widgets["zeroSelObjBut"] = cmds.button("selObjZeroButton", l="Grab All Items From List", w=200, h=20, bgc=(.5,.6,.8), c= partial(selectObj, "masterTSL"))
     cmds.setParent(widgets["zeroCLO"])
     cmds.separator(h=10)
-    widgets["zeroTSL"] = cmds.textScrollList("masterTSL", nr=4, w=400, h=75, ams=True, bgc=(.2, .2, .2))
+    widgets["masterTSL"] = cmds.textScrollList("masterTSL", nr=4, w=400, h=75, ams=True, bgc=(.2, .2, .2))
 
     #ik items layout
     cmds.setParent(widgets["mainCLO"])
@@ -51,9 +53,11 @@ def animPullDownUI():
     widgets["IKBut"] = cmds.button("IKButton", l="Add World Space CTRLs", w=400, h=35, bgc = (.8,.8,.6), c= partial(getControl, "IKTSL"))
 
     widgets["IKRCLO"] = cmds.rowColumnLayout("IKRCLO", nc=2, w=400)
-    widgets["IKClearSelBut"] = cmds.button("clearIKButton", l="Clear Selected", bgc=(.8,.6,.6), w=200, h=30, c= partial(clearList, "IKTSL"))
+    widgets["IKClearSelBut"] = cmds.button("clearIKButton", l="Clear Selected", bgc=(.8,.6,.6), w=200, h=20, c= partial(clearList, "IKTSL"))
+    widgets["IKClearAllBut"] = cmds.button("moveIKButton", l="Clear All", w=200, h=20, bgc=(.8,.5,.5), c= partial(clearAll,  "IKTSL"))
+    widgets["IKStoredBut"] = cmds.button("storedIKButton", l="Add Stored From Selected Master", bgc=(.6,.6,.8), w=200, h=20, c= partial(addStored, "IKTSL"))
+    widgets["IKSelObjBut"] = cmds.button("selObjIKButton", l="Grab All Items From List", bgc=(.5,.6,.8), w=200, h=20, c= partial(selectObj, "IKTSL"))
 
-    widgets["IKClearAllBut"] = cmds.button("moveIKButton", l="Clear All", w=200, h=30, bgc=(.8,.5,.5), c= partial(clearAll,  "IKTSL"))
     cmds.setParent("IKColumnLO")
     cmds.separator(h=10)
     widgets["IKTSL"] = cmds.textScrollList("IKTSL", nr=10, w=400, h=120, ams=True, bgc=(.2, .2, .2))
@@ -64,9 +68,7 @@ def animPullDownUI():
     cmds.setParent(widgets["mainCLO"])
     widgets["doItRCLO"] = cmds.rowColumnLayout("doItLayout", nc=2)
     widgets["doItBut"] = cmds.button("doItButton", l="Pull Animation Down from Master!", w=300, h=50, bgc = (.4,.8,.4), c=pullDownAnim)
-    widgets["pullBut"] = cmds.button("pullButton", l="Store IK Controls", w=100, h=50, bgc = (.4,.4,.8))
-
-#TO-DO----------------make the button which passes info into the second tab (which will catch selections for IK controls)
+    widgets["pullBut"] = cmds.button("pullButton", l="Store WS Controls", w=100, h=50, bgc = (.4,.4,.8), c=partial(storeControls, "storeTSL"))
 
     #create second tab
     cmds.setParent(widgets["tabLO"])
@@ -88,10 +90,28 @@ def animPullDownUI():
     #showWindow
     cmds.showWindow(widgets["win"])
 
+def selectList(layout, *args):
+    """selects everything in the passed text scroll list"""
+    #get list 
+    cmds.textScrollList(widgets[layout], ai=True, si=True)
+    pass
+
+def selectObj(layout, *args):
+    selected = cmds.textScrollList(widgets[layout], q=True, ai=True)
+    cmds.select(cl=True)
+    
+    cmds.select(selected)
+
+def storeControls(layout, *args):
+    pass
+    
 def clearAll(layout, *args):
      """clears the selected text scroll list"""
      pass
-
+     
+def addStored(layout, *args):
+    pass
+    
 def clearList(layout, *args):
     """clears the list of textFields"""
     #get selected items
@@ -113,7 +133,7 @@ def getLocalValues(obj, *args):
     obj_values = []
 
     obj_wRot = cmds.xform(obj, q=True, ws=True, ro=True)
-    obj_wTrans = cmds.xform(obj, q=True, ws=True, rp=True)
+    obj_wTrans = cmds.xform(obj, q=True, ws=True, t=True)
 
     for tval in obj_wTrans:
         obj_values.append(tval)
@@ -122,7 +142,6 @@ def getLocalValues(obj, *args):
 
     return obj_values
     #return (tx, ty, tz, rx, ry, rz)
-
 
 def pullDownAnim(*args):
     #get master controls
@@ -134,7 +153,7 @@ def pullDownAnim(*args):
     allControls = []
     
     #get list of master ctrls
-    mChildren = cmds.textScrollList(widgets["zeroTSL"], q=True, ai=True)
+    mChildren = cmds.textScrollList(widgets["masterTSL"], q=True, ai=True)
     for thisM in mChildren:
         masters.append(thisM)
         allControls.append(thisM)
@@ -153,10 +172,10 @@ def pullDownAnim(*args):
         if keys:
             for thisKey in keys:
                 rawKeys.append(thisKey)
-        #make list from set of list
-        keySet = set(rawKeys)
-        for skey in keySet:
-            keyList.append(skey)
+    #make list from set of list
+    keySet = set(rawKeys)
+    for skey in keySet:
+        keyList.append(skey)
           
     #if no keys, then just add the current time value
     if not rawKeys:
@@ -190,9 +209,31 @@ def pullDownAnim(*args):
         #THEN setKey each control's values to the values in the dict
         for wCtrl in worldCtrls:
             #--------if attr is locked skip it
-            cmds.xform(wCtrl, ws=True, t=(localVals[wCtrl][key][0], localVals[wCtrl][key][1], localVals[wCtrl][key][2]))
+            cmds.xform(wCtrl, ws=True, a=True, t=(localVals[wCtrl][key][0], localVals[wCtrl][key][1], localVals[wCtrl][key][2]))
             cmds.xform(wCtrl, ws=True, ro=(localVals[wCtrl][key][3], localVals[wCtrl][key][4], localVals[wCtrl][key][5]))
-            cmds.setKeyframe(wCtrl, ott="step", t=keyList[key])
-
+            try:
+                cmds.setKeyframe(wCtrl, ott="step", t=keyList[key], at="tx")
+            except:
+                cmds.warning("Couldn't set key for %s.tx, skipping")%wCtrl
+            try:
+                cmds.setKeyframe(wCtrl, ott="step", t=keyList[key], at="ty")
+            except:
+                cmds.warning("Couldn't set key for %s.ty, skipping")%wCtrl            
+            try:
+                cmds.setKeyframe(wCtrl, ott="step", t=keyList[key], at="tz")
+            except:
+                cmds.warning("Couldn't set key for %s.tz, skipping")%wCtrl
+            try:
+                cmds.setKeyframe(wCtrl, ott="step", t=keyList[key], at="rx")
+            except:
+                cmds.warning("Couldn't set key for %s.rx, skipping")%wCtrl
+            try:
+                cmds.setKeyframe(wCtrl, ott="step", t=keyList[key], at="ry")
+            except:
+                cmds.warning("Couldn't set key for %s.ry, skipping")%wCtrl
+            try:
+                cmds.setKeyframe(wCtrl, ott="step", t=keyList[key], at="rz")
+            except:
+                cmds.warning("Couldn't set key for %s.rz, skipping")%wCtrl                
 def animPullDown():
     animPullDownUI()
