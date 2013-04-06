@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 import zbw_rig as rig
 
-#already have ribbon with shitton of joints. Deleted control structure. Create a chain for the master controls
+#already have ribbon with shit-on of joints. Deleted control structure. Create a chain for the master controls
 def ctrlSetup():
 
 	cmds.select(hi=True)
