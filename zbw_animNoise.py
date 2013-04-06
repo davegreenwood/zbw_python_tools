@@ -1,4 +1,6 @@
-#MAKE ENTIRE THING A MODULE
+#TO-DO----------------MAKE ENTIRE THING A MODULE
+#TO-DO----------------better UI
+#TO-DO----------------
 
 import maya.cmds as cmds
 import random

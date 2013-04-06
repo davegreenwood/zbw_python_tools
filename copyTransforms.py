@@ -1,3 +1,6 @@
+#TO-DO----------------create UI. . . (this is already done, btw)
+#TO-DO----------------options for showing values captured, for copying only selected attr. .. for multiple keys? ? 
+
 import maya.cmds as cmds
 
 sel = cmds.ls(sl=True, type="transform")

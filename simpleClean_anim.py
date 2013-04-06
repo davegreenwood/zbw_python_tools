@@ -1,4 +1,8 @@
+#TO-DO----------------GUI, option for keeping cuplets, keeping singlets, 
+#TO-DO----------------maybe pair this with the script to step+ all
+
 #script to find keys that are doing nothing and delete them
+
 
 import maya.cmds as cmds
 

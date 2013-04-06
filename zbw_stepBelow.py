@@ -1,5 +1,7 @@
 """select master control and run script. It will take all nurbs curves under the master and step key them"""
 
+#TO-DO----------------make zbw_anim as a base of code
+
 #TO-DO---------------------make UI
 #TO-DO---------------------using UI, give option for what type of tangents (so not just step) and time ranges(timeline or selected)
 #TO-DO---------------------make sure it uses multiple selections (multiple objects selected)

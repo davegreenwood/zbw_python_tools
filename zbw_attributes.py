@@ -12,6 +12,7 @@ from functools import partial
 import maya.mel as mel
 
 #TO-DO----------------add "breakConnections"? disconnect and if they're anim curves delete them.
+#TO-DO----------------add options for individual channels for tx, ty, etc
 
 widgets = {}
 colors = {}
