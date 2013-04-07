@@ -7,6 +7,9 @@
 #notes: put this in your scripts folder. use "import zbw_appendPath", then "zbw_appendPath.appendPath()"
 ########################
 
+
+#TO-DO----------------add option in second tab to move path up or down the stack, maybe also move to top (pop out of list?)
+
 import sys, os
 import maya.cmds as cmds
 from functools import partial
