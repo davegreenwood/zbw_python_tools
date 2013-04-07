@@ -10,14 +10,71 @@ def shiftUI(*args):
 	if cmds.window("shiftWin", exists=True):
 		cmds.deleteUI("shiftWin")
 
-	widgets["win"] = cmds.window("shiftWin", w=400, h=400)
+	widgets["win"] = cmds.window("shiftWin", t="zbw_animShift", w=450, h=400)
 	widgets["mainCLO"] = cmds.columnLayout()
 
-	widgets["mainFLO"] = cmds.formLayout() #or do rowColumnLayout with 3 columns
+	widgets["getBaseBut"]  = cmds.button(l="Get Base Object To Drive Shift", w=450, h=40, bgc=(.6,.8,.6), c=getBase)
+	widgets["baseTFG"] = cmds.textFieldGrp(l="Base Object", cal=((1,"left"), (2,"left")), cw=((1, 100),(2,300)))
+	cmds.separator(h=10)
+	widgets["valueRCL"] = cmds.rowColumnLayout(nc=3, cw=([1,150],[2,150],[3,150])) #or do formLayout with 3 columns
 	#create the columns for the three different fields we'll need (left=orig, mid=changed, right=diff)
+	cmds.text("Orig Values")
+	cmds.text("Modified Values")
+	cmds.text("Difference Value")
+	cmds.separator(style="single", h=5)
+	cmds.separator(style="single", h=5)
+	cmds.separator(style="single", h=5)
 
-	#checkbox to unlock (or enable) the third (difference) column
+	widgets["origTxFFG"] = cmds.floatFieldGrp(l="tx", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+	widgets["modTxFFG"] = cmds.floatFieldGrp(l="tx", cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+	widgets["difTxFFG"] = cmds.floatFieldGrp(l="tx", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
 
+	widgets["origTyFFG"] = cmds.floatFieldGrp(l="ty", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+	widgets["modTyFFG"] = cmds.floatFieldGrp(l="ty", cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+	widgets["difTyFFG"] = cmds.floatFieldGrp(l="ty", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+
+	widgets["origTzFFG"] = cmds.floatFieldGrp(l="tz", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+	widgets["modTzFFG"] = cmds.floatFieldGrp(l="tz", cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+	widgets["difTzFFG"] = cmds.floatFieldGrp(l="tz", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+
+	cmds.separator(style="single", h=5)
+	cmds.separator(style="single", h=5)
+	cmds.separator(style="single", h=5)
+
+	widgets["origRxFFG"] = cmds.floatFieldGrp(l="rx", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+	widgets["modRxFFG"] = cmds.floatFieldGrp(l="rx", cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+	widgets["difRxFFG"] = cmds.floatFieldGrp(l="rx", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+
+	widgets["origRyFFG"] = cmds.floatFieldGrp(l="ry", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+	widgets["modRyFFG"] = cmds.floatFieldGrp(l="ry", cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+	widgets["difRyFFG"] = cmds.floatFieldGrp(l="ry", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+
+	widgets["origRzFFG"] = cmds.floatFieldGrp(l="rz", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+	widgets["modRzFFG"] = cmds.floatFieldGrp(l="rz", cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+	widgets["difRzFFG"] = cmds.floatFieldGrp(l="rz", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+
+	cmds.separator(style="single", h=5)
+	cmds.separator(style="single", h=5)
+	cmds.separator(style="single", h=5)
+
+	widgets["origSxFFG"] = cmds.floatFieldGrp(l="sx", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+	widgets["modSxFFG"] = cmds.floatFieldGrp(l="sx", cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+	widgets["difSxFFG"] = cmds.floatFieldGrp(l="sx", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+
+	widgets["origSyFFG"] = cmds.floatFieldGrp(l="sy", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+	widgets["modSyFFG"] = cmds.floatFieldGrp(l="sy", cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+	widgets["difSyFFG"] = cmds.floatFieldGrp(l="sy", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+
+	widgets["origSzFFG"] = cmds.floatFieldGrp(l="sz", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+	widgets["modSzFFG"] = cmds.floatFieldGrp(l="sz", cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+	widgets["difSzFFG"] = cmds.floatFieldGrp(l="sz", cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+
+	cmds.separator(style="single", h=5)
+	cmds.separator(style="single", h=5)
+	cmds.separator(style="single", h=5)
+
+	#checkbox to unlock (or enable) th second and third (difference) column
+	
 	#create two buttons for the function (first will capture the values at the current time(and the name of the base object), second will add the new changed values to the second column and calc the difference in the third)
 
 	#textfield that holds the name of the base object (should be un-enabled)
@@ -29,7 +86,7 @@ def shiftUI(*args):
 
 
 	cmds.showWindow(widgets["win"])
-	cmds.window(widgets["win"], e=True, w=400, h=400)
+	cmds.window(widgets["win"], e=True, w=450, h=400)
 
 
 #####functions
