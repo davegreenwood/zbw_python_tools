@@ -45,7 +45,7 @@ def appendUI():
 	refresh()
 	widgets["columnLO3"] = cmds.columnLayout(w=500, h=50)
 	widgets["refreshBut"] = cmds.button(l="Refresh Paths", w=500, h=40, bgc=(.5, .5, .6), c=refresh)
-
+#TO-DO----------------add buttons to move selected up, move selected down, move selected to top
 	#load (and check) previous saves
 
 
