@@ -6,6 +6,8 @@ import math
 from functools import partial
 import maya.mel as mel
 
+#TO-DO----------------add help menu with popup to describe situation
+#TO-DO----------------add rotation orders into the equation here for each object
 #TO-DO----------------add option for including scale??
 #TO-DO----------------checkbox for using rotate pivot or translate? on master buttons area?
 #TO_DO----------------save out the selected controls to get them later?

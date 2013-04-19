@@ -1,4 +1,11 @@
-#script to find keys that are doing nothing and delete them
+########################
+#file: zbw_cleanKeys.py
+#author: zeth willie
+#contact: zeth@catbuks.com, www.williework.blogspot.com
+#date modified: 4/19/13
+#
+#notes: place in scripts folder (or other location in the sys.path) and in python tab, type "import zbw_cleanKeys;zbw_cleanKeys.cleanKeys()"
+########################
 
 import maya.cmds as cmds
 from functools import partial
@@ -9,7 +16,7 @@ def cleanUI(*args):
     if cmds.window("cleanWin", exists=True):
         cmds.deleteUI("cleanWin")
         
-    widgets["win"] = cmds.window("cleanWin", w=300, h=200)
+    widgets["win"] = cmds.window("cleanWin", w=300, h=220)
     widgets["mainCLO"] = cmds.columnLayout()
     widgets["tabLO"] = cmds.tabLayout()
     
@@ -23,14 +30,21 @@ def cleanUI(*args):
     widgets["timeRBG"] = cmds.radioButtonGrp(nrb=3,l1="Timeslider", l2="All Anim", l3="Frame Range", sl=2, cw=[(1,100),(2,75),(3,75)] ,cc=partial(enableFR, "timeRBG", "frameRangeIFG", "keepCBG"))
     #int field group for frame range
     widgets["frameRangeIFG"] = cmds.intFieldGrp(nf=2, l="Start/End", v1=1, v2=24, en=False, cal=[(1,"left"),(2,"left"),(3,"left")], cw=[(1,75),(2,75),(3,75)])
-    #check box for singlets and couplets
-    
-    cmds.separator(h=10, style="single")
-    cmds.text("Singletons have only one key. Couplets have only 2 keys")
-    widgets["keepCBG"] = cmds.checkBoxGrp(ncb=2, l1="Keep Singletons", l2="Keep Identical Couplets", v1=0, v2=0)
+
+
     #radio button group for nurbs curves only or for all transforms
     widgets["curvesRBG"] = cmds.radioButtonGrp(nrb=2, l1="Curves/Volume Primatives Only", l2="All DAG", sl=1, cw=[(1, 170),(2, 130)])
+
+    cmds.separator(h=10, style="single")
     
+    #area to create/keep buffer curves
+    widgets["bufCBG"] = cmds.checkBoxGrp(ncb=2, l1="Buffer Original Curve", l2="Overwrite Existing Buffer", v1=1, v2=0, cw=([1, 140], [2,50], [3,100], [4,50]), cal=([1, "left"], [2,"left"], [3,"left"],[4,"left"]))
+
+    cmds.separator(h=10, style="single")    
+    #check box for singlets and couplets    
+    cmds.text("Singletons have only one key. Couplets have only 2 keys")
+    widgets["keepCBG"] = cmds.checkBoxGrp(ncb=2, l1="Keep Singletons", l2="Keep Identical Couplets", v1=0, v2=0)
+
     cmds.separator(h=10)
     widgets["cleanBut"] = cmds.button(l="Clean Animation Curves!", w=300, h=40, bgc=(.6,.8,.6), c=clean)
     
@@ -59,7 +73,7 @@ def cleanUI(*args):
     widgets["selectBut"] = cmds.button(l="Select Objects in Hierarchy", w=300, h=20, bgc=(.8,.6,.6), c=selectHier)
     
     cmds.showWindow(widgets["win"])
-    cmds.window(widgets["win"], e=True, w=300, h=200)
+    cmds.window(widgets["win"], e=True, w=300, h=220)
 
 def enableSelect(*args):
     """when hierarchy is selected, this enables the option for curves only """
@@ -113,6 +127,9 @@ def clean(*args):
     startF = 0
     endF = 0
     tolerance = 0.0001
+    #checking buffer settings
+    buffer = cmds.checkBoxGrp(widgets["bufCBG"], q=True, v1=True)
+    bufOverwrite = cmds.checkBoxGrp(widgets["bufCBG"], q=True, v2=True)    
     
     #get the selection based on the criteria above
     selection = cmds.ls(sl=True, type="transform")
@@ -133,6 +150,9 @@ def clean(*args):
                 if curveList:
                     for curve in curveList:
                         sel.append(curve)
+            
+                for obj in selection:
+                    sel.append(obj)
                             
             elif curves == 2:
                 #get transforms without filtering for curves
@@ -170,6 +190,10 @@ def clean(*args):
     #print "this will clean keys for: %s"%sel  
     # loop through objects
     for object in sel:
+        #create buffer curve
+        if buffer:
+            cmds.bufferCurve(object, ov=bufOverwrite)
+        
         keyedAttr = []
         # find which attr have keys on them
         keyedAttrRaw = cmds.keyframe(object, q=True, name=True)

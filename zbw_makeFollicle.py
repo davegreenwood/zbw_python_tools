@@ -1,3 +1,12 @@
+########################
+#file: zbw_makeFollicle.py
+#author: zeth willie
+#contact: zeth@catbuks.com, www.williework.blogspot.com
+#date modified: 
+#
+#notes: select a vertex on a polysurface and type name and create follicle
+########################
+
 #create a follicle on the specified uv location
 import maya.cmds as cmds
 import maya.mel as mel
@@ -99,12 +108,13 @@ def getUV(*args):
 def follicle(surface="none", folName="none", u=0.5, v=0.5, *args): 
 #------------do a bit more checking here to make sure the shapes, numbers etc work out
 #------------i.e. make sure the name of the follicle isn't already taken before trying to create the new one
-    print "surface is: %s"%surface
-    print "folName is: %s"%folName
+    # print "surface is: %s"%surface
+    # print "folName is: %s"%folName
     if surface=="none":
-		#decide if surface is polymesh or nurbsSurface
-		surfaceXform = cmds.ls(sl=True, dag=True, type="transform")[0]
-		surfaceShape = cmds.listRelatives(surfaceXform, shapes=True)[0]
+        #decide if surface is polymesh or nurbsSurface
+        #TO-DO----------------make this more generic so I can use it elsewhere
+        surfaceXform = cmds.ls(sl=True, dag=True, type="transform")[0]
+        surfaceShape = cmds.listRelatives(surfaceXform, shapes=True)[0]
     else:
         surfaceXform = surface
         surfaceShape = cmds.listRelatives(surfaceXform, shapes=True)[0]

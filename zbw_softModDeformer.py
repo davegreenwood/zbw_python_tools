@@ -1,6 +1,9 @@
 import maya.cmds as cmds
 
-#TO-DO----------------put the softmod under a follicle that is attached to the skin
+#TO-DO----------------put the softmod under a follicle that is attached to the skin?
+#TO-DO----------------make secondare control for deformer location. . . 
+#TO-DO----------------add soft select to another tab, figure out control, etc.
+
 widgets = {}
 
 def softModDeformerUI():
