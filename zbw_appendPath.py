@@ -9,6 +9,7 @@
 
 
 #TO-DO----------------add option in second tab to move path up or down the stack, maybe also move to top (pop out of list?)
+#TO-DO----------------to do this, use "list[0:0] = [list.pop(index)]"
 
 import sys, os
 import maya.cmds as cmds

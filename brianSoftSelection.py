@@ -5,7 +5,7 @@ import maya.cmds as cmds
 #----------------naming conventions for objects and controls (consequently clusters)
 #----------------deal with window for this
 #TO-DO----------------put it under a follicle (at least option for that)
-
+#auto iterate up the name? by adding _1, etc
 
 def softSelection():
     #Grab the soft selection
@@ -50,6 +50,7 @@ for elem in elements:
 
 clus = cmds.cluster(relative=True, name="thisCluster")
 
+
 for i in range(len(elements)):
     element = elements[i]
     value = weights[i]
@@ -57,7 +58,7 @@ for i in range(len(elements)):
     cmds.percent(clus[0], element,  v=value, )
 
 #get cluster position
-clusPos = cmds.xform("thisClusterHandle", ws=True, q=True, rp=True)
+clusPos = cmds.xform(clus[1], ws=True, q=True, rp=True)
 
 #create closest point on mesh (surface?) node
 cpomNode = cmds.shadingNode("closestPointOnMesh", asUtility=True, n="tempCPOM")
