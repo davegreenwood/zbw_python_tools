@@ -2,9 +2,9 @@
 #file: zbw_attributes.py
 #author: zeth willie
 #contact: zeth@catbuks.com, www.williework.blogspot.com
-#date modified: 1/26/13
+#date modified: 4/23/13
 #
-#notes: some basic stuff for everyday rigging, etc
+#notes: some basic stuff for everyday rigging involving channels and attrs. To run type "import zbw_attributes; zbw_attributes.attributes()"
 ########################
 
 import maya.cmds as cmds
@@ -12,7 +12,6 @@ from functools import partial
 import maya.mel as mel
 
 #TO-DO----------------add "breakConnections"? disconnect and if they're anim curves delete them.
-#TO-DO----------------add options for individual channels for tx, ty, etc
 
 widgets = {}
 colors = {}
@@ -54,15 +53,29 @@ def attrUI(*args):
 	widgets["lockFrLO"] = cmds.frameLayout(l="Lock/Hide", cll=True, w=250, bgc=(.7,.6,.6))
 	widgets["lockColLO"] = cmds.columnLayout(bgc=(.8,.8,.8))
 	#lock and hide controls
-	widgets["channelCBG"] = cmds.checkBoxGrp(w=250, cw4=(60,60,60,60), ncb=4, l1="Trans", l2="Rot", l3="Scale", l4="Vis", va4=(0,0,1,1))
+
+	#switch to Row column layout to break up the channels
+	widgets["attrRCLO"] = cmds.rowColumnLayout(nc=2, cw=([1, 100], [2,150]))
+	widgets["transCB"] = cmds.checkBox(l="Translates", v=0, cc=partial(enableChannel, "transCB", "translateCBG"))
+	widgets["translateCBG"] = cmds.checkBoxGrp(w=150, cw3=(50,50,50), ncb=3, l1="TX", l2="TY", l3="TZ", l4="Vis", va3=(0,0,0), bgc=(.5,.5,.5), en=False)
+	widgets["rotCB"] = cmds.checkBox(l="Rotates", v=0, cc=partial(enableChannel, "rotCB","rotateCBG"))
+	widgets["rotateCBG"] = cmds.checkBoxGrp(w=150, cw3=(50,50,50), ncb=3, l1="RX", l2="RY", l3="RZ", l4="Vis", va3=(0,0,0), bgc=(.5,.5,.5), en=False)
+	widgets["scaleCB"] = cmds.checkBox(l="Scales", v=1, cc=partial(enableChannel, "scaleCB","scaleCBG"))
+	widgets["scaleCBG"] = cmds.checkBoxGrp(w=150, cw3=(50,50,50), ncb=3, l1="SX", l2="SY", l3="SZ", l4="Vis", va3=(1,1,1), bgc=(.5,.5,.5), en=True)
+	widgets["visCB"] = cmds.checkBox(l="Visibility", v=1)
+
+	#back to frame layout
+	cmds.setParent(widgets["lockFrLO"])
 	widgets["lockRBG"] = cmds.radioButtonGrp(nrb=2, l1="Unlock", l2="Lock", sl=2)
 	widgets["hideRBG"] = cmds.radioButtonGrp(nrb=2, l1="Show", l2="Hide", sl=2)
 	widgets["channelsBut"] = cmds.button(l="Lock/Hide Channels", w=150, h=30, bgc=(.5,.5,.5), rs=True, c=channelLockHide)
 	cmds.separator(h=5, st="none")
 
+	#back to columnLayout
 	cmds.setParent(widgets["channelColLO"])
 	widgets["colorFrLO"] = cmds.frameLayout(l="Object Color", cll=True, w=250, bgc=(.7,.6,.6))
 	widgets["colorRCLO"] = cmds.rowColumnLayout(nr=4, bgc=(.8,.8,.8))
+
 	#color controls (red, green, blue, yellow, other)
 	cmds.canvas(w=50, h=20, rgb=(1,0,0), pc=partial(changeColor, colors["red"]))
 	cmds.canvas(w=50, h=20, rgb=(.5,.1,.1), pc=partial(changeColor, colors["darkRed"]))
@@ -136,16 +149,39 @@ def attrUI(*args):
 	cmds.showWindow(widgets["win"])
 	cmds.window(widgets["win"], e=True, w=250, h=370)
 
+
+def enableChannel(source, target, *args):
+	"""This function enables or disables the indiv channel checkboxes when attr is toggled"""
+	CBG = widgets[target]
+	on = cmds.checkBox(widgets[source], q=True, v=True)
+	if on:
+		cmds.checkBoxGrp(CBG, e=True, en=True, va3=(1,1,1))
+	else:
+		cmds.checkBoxGrp(CBG, e=True, en=False, va3=(0,0,0))
+
 def channelLockHide(*args):
+	"""this is the function to actually do the locking and hiding of the attrs selected in the UI"""
+
 	sel = cmds.ls(sl=True, type="transform")
 	if sel:
 		channels = []
-		t = cmds.checkBoxGrp(widgets["channelCBG"], q=True, v1=True)
-		r = cmds.checkBoxGrp(widgets["channelCBG"], q=True, v2=True)
-		s = cmds.checkBoxGrp(widgets["channelCBG"], q=True, v3=True)
-		v = cmds.checkBoxGrp(widgets["channelCBG"], q=True, v4=True)
+		tx = cmds.checkBoxGrp(widgets["translateCBG"], q=True, v1=True)
+		ty = cmds.checkBoxGrp(widgets["translateCBG"], q=True, v2=True)
+		tz = cmds.checkBoxGrp(widgets["translateCBG"], q=True, v3=True)
+
+		rx = cmds.checkBoxGrp(widgets["rotateCBG"], q=True, v1=True)
+		ry = cmds.checkBoxGrp(widgets["rotateCBG"], q=True, v2=True)
+		rz = cmds.checkBoxGrp(widgets["rotateCBG"], q=True, v3=True)
+
+		sx = cmds.checkBoxGrp(widgets["scaleCBG"], q=True, v1=True)
+		sy = cmds.checkBoxGrp(widgets["scaleCBG"], q=True, v2=True)
+		sz = cmds.checkBoxGrp(widgets["scaleCBG"], q=True, v3=True)
+
+		v = cmds.checkBox(widgets["visCB"], q=True, v=True)
+
 		lock = cmds.radioButtonGrp(widgets["lockRBG"], q=True, sl=True)
 		key = cmds.radioButtonGrp(widgets["hideRBG"], q=True, sl=True)
+
 		if lock == 1:
 			lock = 0
 		elif lock == 2:
@@ -155,24 +191,17 @@ def channelLockHide(*args):
 		elif key == 2:
 			key = 0
 
-		trans = [".tx", ".ty", ".tz"]
-		rot = [".rx", ".ry", ".rz"]
-		scale = [".sx", ".sy", ".sz"]
-		vis = [".v"]
-
-		if t:
-			channels.extend(trans)
-		if r:
-			channels.extend(rot)
-		if s:
-			channels.extend(scale)
-		if v:
-			channels.extend(vis)
+		attrs = {"tx":tx, "ty":ty, "tz":tz, "rx":rx, "ry":ry, "rz":rz, "sx":sx, "sy":sy, "sz":sz, "v":v}
+		for attr in attrs:
+			if attrs[attr]:
+				channels.append("%s"%attr)
 
 		for obj in sel:
 			for channel in channels:
-				cmds.setAttr((obj+channel), l=lock)
-				cmds.setAttr((obj+channel), k=key)
+				cmds.setAttr("%s.%s"%(obj, channel), l=lock)
+				cmds.setAttr("%s.%s"%(obj, channel), k=key)
+	else:
+		cmds.warning("You haven't selected anything!")
 
 def changeColor(color, *args):
 	sel = cmds.ls(sl=True, type="transform")
