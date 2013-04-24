@@ -2,14 +2,10 @@
 #file: zbw_appendPath.py
 #author: zeth willie
 #contact: zeth@catbuks.com, www.williework.blogspot.com
-#date modified: 01/15/13
+#date modified: 04/23/13
 #
 #notes: put this in your scripts folder. use "import zbw_appendPath", then "zbw_appendPath.appendPath()"
 ########################
-
-
-#TO-DO----------------add option in second tab to move path up or down the stack, maybe also move to top (pop out of list?)
-#TO-DO----------------to do this, use "list[0:0] = [list.pop(index)]"
 
 import sys, os
 import maya.cmds as cmds
@@ -18,11 +14,13 @@ from functools import partial
 widgets = {}
 
 def appendUI():
+	"""UI for appendPath script"""
+
 	#create window with 3 text fields, buttons call up proc to add path
 	if cmds.window("appendPath", exists=True):
 		cmds.deleteUI("appendPath")
 
-	widgets["win"] = cmds.window("appendPath", t="zbw_appendPath", w=500, h=170)
+	widgets["win"] = cmds.window("appendPath", t="zbw_appendPath", w=500, h=190)
 
 	#create some menus for saving and loading
 	cmds.setParent(widgets["win"])
@@ -32,26 +30,74 @@ def appendUI():
 	cmds.menuItem(l="Save Add Paths", c=saveValues)
 	cmds.menuItem(l="Load Add Paths", c=loadValues)
 
-	widgets["tabLO"] = cmds.tabLayout(h=170)
-	widgets["columnLO"] = cmds.columnLayout("Add Paths", w=500, h=170)
+	widgets["tabLO"] = cmds.tabLayout(h=190)
+	widgets["columnLO"] = cmds.columnLayout("Add Paths", w=500)
 	widgets["path1"] = cmds.textFieldButtonGrp(l="path1", cal=[(1, "left"), (2,"left"),(3,"left")], cw3=(40, 410, 50), bl="<<<", bc=partial(addToField, 1))
 	widgets["path2"] = cmds.textFieldButtonGrp(l="path2", cal=[(1, "left"), (2,"left"),(3,"left")], cw3=(40, 410, 50), bl="<<<", bc=partial(addToField, 2))
 	widgets["path3"] = cmds.textFieldButtonGrp(l="path3", cal=[(1, "left"), (2,"left"),(3,"left")], cw3=(40, 410, 50), bl="<<<", bc=partial(addToField, 3))
 	cmds.separator(h=10, st="single")
-	widgets["AddBut"] = cmds.button(l="Add paths to sys.path", w=500, h=40, bgc=(.6, .5, .5), c=append)
+	widgets["AddBut"] = cmds.button(l="Add paths to sys.path", w=500, h=30, bgc=(.6, .5, .5), c=append)
+	cmds.separator(h=5, style="single")
+	cmds.text("Click the '<<<' buttons to browse for paths to add. Click the 'Add' button to add those \npaths to the 'sys.path' list. Use the 'ViewPath' tab to view current list of paths.", al="center")
+	cmds.text("Use 'file->save' to save the selected paths. Use 'file->load' to load previously saved paths")
+
 	#back to window
 	cmds.setParent(widgets["tabLO"])
-	widgets["columnLO2"] = cmds.columnLayout("View Paths", w=500, h=100)
+	widgets["columnLO2"] = cmds.columnLayout("View Paths", w=500)
+	cmds.text("Double-click to display full path in script editor")
 	widgets["listTSL"] = cmds.textScrollList(w=500, h=100, fn="smallPlainLabelFont", append=["click button below", "to refresh this list!"], dcc=printMe)
 	refresh()
-	widgets["columnLO3"] = cmds.columnLayout(w=500, h=50)
-	widgets["refreshBut"] = cmds.button(l="Refresh Paths", w=500, h=40, bgc=(.5, .5, .6), c=refresh)
-#TO-DO----------------add buttons to move selected up, move selected down, move selected to top
+	cmds.separator(h=5, style="single")
+
+	widgets["columnLO3"] = cmds.columnLayout(w=500)
+	widgets["refreshBut"] = cmds.button(l="Refresh Paths", w=500, h=20, bgc=(.5, .5, .6), c=refresh)
+
+	cmds.rowColumnLayout(nc=3, cw=[(1,200),(2,150 ),(3,150)])
+	widgets["removeBut"] = cmds.button(l="Remove Selected", w=180, 	h=20, bgc=(.7, .5, .5), c=removePath)
+	widgets["topBut"] = cmds.button(l="Selected To Top", w=130, h=20, bgc=(.7, .5, .5), c=topPath)
+	widgets["bottomBut"] = cmds.button(l="Selected To Bottom", w=130, h=20, bgc=(.7, .5, .5), c=bottomPath)
+
 	#load (and check) previous saves
 
 
 	cmds.showWindow(widgets["win"])
-	cmds.window(widgets["win"], e=True, w=500, h=170)
+	cmds.window(widgets["win"], e=True, w=500, h=190)
+
+def bottomPath(*args):
+	"""function to move path of selected index to the bottom of the list"""
+	#get the selection index from the TSL
+	indexRaw = cmds.textScrollList(widgets["listTSL"], q=True, sii=True)
+	if indexRaw:
+		index = indexRaw[0]-1
+		dropped = sys.path.pop(index)
+		sys.path.append(dropped)
+		refresh()
+		print "Moved '%s' to bottom of list"%sys.path[0]
+	else:
+		cmds.warning("You need to select an entry on the path list to move it to the bottom")
+
+def topPath(*args):
+	"""function to move the selected index item to the top of the path list"""
+	#get the selection index from the TSL
+	indexRaw = cmds.textScrollList(widgets["listTSL"], q=True, sii=True)
+	if indexRaw:
+		index = indexRaw[0]-1
+		sys.path[0:0] = [sys.path.pop(index)]
+		refresh()
+		print "Moved '%s' to top of list"%sys.path[0]
+	else:
+		cmds.warning("You need to select an entry on the path list to move it to the top")
+
+def removePath(*args):
+	#get the selection index from the TSL
+	indexRaw = cmds.textScrollList(widgets["listTSL"], q=True, sii=True)
+	if indexRaw:
+		index = indexRaw[0]-1
+		dropped = sys.path.pop(index)
+		refresh()
+		print "Removed '%s' from sys.path"%dropped
+	else:
+		cmds.warning("You need to select an entry on the path list to remove it")
 
 def addToField(num, *args):
 	#set the field to add to
@@ -88,8 +134,11 @@ def append(*args):
 	for path in paths:
 		if path:
 			if os.path.isdir(path):
-				sys.path.append(path)
-				check += 1
+				if path in sys.path:
+					cmds.warning("'%s' is already in sys.path. Skipping!"%path)
+				else:
+					sys.path.append(path)
+					check += 1
 			else:
 				cmds.warning("%s is not an existing path and wasn't added to sys.path"%path)
 	if check > 0:
