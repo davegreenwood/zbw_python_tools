@@ -7,12 +7,12 @@ from functools import partial
 import maya.mel as mel
 
 #TO-DO----------------add help menu with popup to describe situation
-#TO-DO----------------add rotation orders into the equation here for each object
+#TO-DO----------------ADD ROTATION ORDERS INTO THE EQUATION HERE FOR EACH OBJECT
 #TO-DO----------------add option for including scale??
 #TO-DO----------------checkbox for using rotate pivot or translate? on master buttons area?
 #TO_DO----------------save out the selected controls to get them later?
 #TO-DO----------------figure out how to do step keys (step next)
-#TO-DO----------------option to select all objects in world ctrl list, double click in list to select? 
+#TO-DO----------------option to select all objects in world ctrl list, double click in list to select?
 #TO-DO----------------frame range option? probably not necessary, think of a situation in which you'd need it
 #TO-DO----------------dummy check selections (for clear, grab selected, add to list, etc)
 widgets = {}
@@ -93,17 +93,17 @@ def animPullDownUI():
 
 # def selectList(layout, *args):
     # """selects everything in the passed text scroll list"""
-    # #get list 
+    # #get list
     # cmds.textScrollList(widgets[layout], ai=True, si=True)
     # pass
 def showName(layout, *args):
     sel = cmds.textScrollList(widgets[layout], q=True, si=True)
     print sel
-    
+
 def selectObj(layout, *args):
     selected = cmds.textScrollList(widgets[layout], q=True, ai=True)
     cmds.select(cl=True)
-    
+
     cmds.select(selected)
 
 def storeControls(layout, *args):
@@ -114,11 +114,11 @@ def storeControls(layout, *args):
         nsCtrl = item.rpartition("|")[2]
         ctrl = nsCtrl.rpartition(":")[2]
         cmds.textScrollList(widgets["storeTSL"], e=True, a=ctrl)
-    
+
 def clearAll(layout, *args):
      """clears the selected text scroll list"""
      cmds.textScrollList(widgets[layout], e=True, ra=True)
-     
+
 def addStored(layout, *args):
     """search for the stored ctrl names under the selected master control"""
     #get master ctrl
@@ -148,7 +148,7 @@ def addStored(layout, *args):
             else:
                 cmds.warning("Couldn't find %s. Skipping."%fullCtrl)
 
-    
+
 def clearList(layout, *args):
     """clears the list of textFields"""
     #get selected items
@@ -195,13 +195,13 @@ def pullDownAnim(*args):
     for thisM in mChildren:
         masters.append(thisM)
         allControls.append(thisM)
-        
+
     #get list of world space objects
     wChildren = cmds.textScrollList(widgets["IKTSL"], q=True, ai=True)
     for thisIK in wChildren:
         worldCtrls.append(thisIK)
         allControls.append(thisIK)
-#------------------get keys from secondary controls also. .  . 
+#------------------get keys from secondary controls also. .  .
     #get full list of keys (keyList)
     for each in allControls:
         #get list of keys for each master
@@ -214,11 +214,11 @@ def pullDownAnim(*args):
     keySet = set(rawKeys)
     for skey in keySet:
         keyList.append(skey)
-          
+
     #if no keys, then just add the current time value
     if not rawKeys:
         keyList.append(currentTime)
-    
+
     keyList.sort()
     print keyList
 
@@ -234,7 +234,7 @@ def pullDownAnim(*args):
             theseVals = getLocalValues(wCtrl)
             localList.append(theseVals)
         localVals[wCtrl] = localList
-    
+
     #zero out the master controls
     for key in range(len(keyList)):
         mel.eval("currentTime %s;"%keyList[key])
@@ -255,7 +255,7 @@ def pullDownAnim(*args):
             try:
                 cmds.setKeyframe(wCtrl, ott="step", itt="step", t=keyList[key], at="ty")
             except:
-                cmds.warning("Couldn't set key for %s.ty, skipping")%wCtrl            
+                cmds.warning("Couldn't set key for %s.ty, skipping")%wCtrl
             try:
                 cmds.setKeyframe(wCtrl, ott="step", itt="step", t=keyList[key], at="tz")
             except:
@@ -272,13 +272,13 @@ def pullDownAnim(*args):
                 cmds.setKeyframe(wCtrl, ott="step", itt="step", t=keyList[key], at="rz")
             except:
                 cmds.warning("Couldn't set key for %s.rz, skipping")%wCtrl
-    
+
     for mCtrl in masters:
         if deleteMaster:
             try:
                 cmds.cutKey(mCtrl, at=["tx", "ty", "tz", "rx", "ry", "rz"])
             except:
                 print "Tried to cut keys on master, but couldn't"
-                
+
 def animPullDown():
     animPullDownUI()

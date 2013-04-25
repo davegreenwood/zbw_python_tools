@@ -2,154 +2,189 @@
 #file: zbw_animShift.py
 #author: zeth willie
 #contact: zeth@catbuks.com, www.williework.blogspot.com
-#date modified: 4/07/13
+#date modified: 4/23/13
 #
 #notes:
 ########################
 
-# select an object and capture it's initial values, these will be shown in a column (t, r, s). Then move that object around and capture the new values (these are in a second adjacent column). This will fill in an offset column. Then there's a button that will offset the curves for each attr, EXCEPT at that frame if there's a key there. You can then select another object and apply that same transformation. . . You can have option to enable the "offset" column and manually enter the offset values.
-
-#TO-DO----------------add in time options (range, slider, all)
-#TO-DO----------------make whole thing a class so I can pass info down about whether there was a key or not, etc.
-#TO-DO----------------make whole thing w/ frame layout? At least make it narrower by 50 px
+#TO-DO------ ----------add in time options (range, slider, all)
+#TO-DO----------------reload last base? Store this as variable (self.base) button to do this
 
 import maya.cmds as cmds
 
-widgets = {}
+class AnimShift(object):
 
-def shiftUI(*args):
-	"""ui for the module"""
+	def __init__(self):
 
-	if cmds.window("shiftWin", exists=True):
-		cmds.deleteUI("shiftWin")
+		self.widgets = {}
+		self.frame = 1
 
-	widgets["win"] = cmds.window("shiftWin", t="zbw_animShift", w=450, h=500)
-	widgets["mainCLO"] = cmds.columnLayout()
+		#add in the vars for if there's a key on base
+		self.txk=False
+		self.tyk=False
+		self.tzk=False
+		self.rxk=False
+		self.ryk=False
+		self.rzk=False
+		self.sxk=False
+		self.syk=False
+		self.szk=False
 
-	widgets["getBaseBut"]  = cmds.button(l="Set Base Object and Frame To Drive Shift", w=450, h=40, bgc=(.6,.8,.6), c=getBase)
-	widgets["baseTFG"] = cmds.textFieldGrp(l="Base Object", cal=((1,"left"), (2,"left")), cw=((1, 100),(2,300)), ed=False)
-	widgets["baseFrameFFG"] = cmds.floatFieldGrp(l="Base Frame", cal = ((1, "left"), (2,"left")), cw=((1,100), (2,50)), pre=2, en=False)
-#TO-DO----------------add frame counter to know what frame you grabbed the values from (and to go back there to calc the differences.). Maybe button to take you back there
-	cmds.separator(h=10)
+		self.shiftUI()
 
-	widgets["valueRCL"] = cmds.rowColumnLayout(nc=3, cw=([1,150],[2,150],[3,150])) #or do formLayout with 3 columns
-	#create the columns for the three different fields we'll need (left=orig, mid=changed, right=diff)
-	cmds.text("Orig Values")
-	cmds.text("Modified Values")
-	cmds.text("Difference Value")
-	cmds.separator(style="single", h=5)
-	cmds.separator(style="single", h=5)
-	cmds.separator(style="single", h=5)
+	def shiftUI(self, *args):
+		"""ui for the class"""
 
-	widgets["origTxFFG"] = cmds.floatFieldGrp(l="tx", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["modTxFFG"] = cmds.floatFieldGrp(l="tx", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["difTxFFG"] = cmds.floatFieldGrp(l="tx", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+		if cmds.window("shiftWin", exists=True):
+			cmds.deleteUI("shiftWin")
 
-	widgets["origTyFFG"] = cmds.floatFieldGrp(l="ty", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["modTyFFG"] = cmds.floatFieldGrp(l="ty", pre=5, cal=([1,"left"], [2, "left"]),  en=False,cw=([1, 30], [2,75]))
-	widgets["difTyFFG"] = cmds.floatFieldGrp(l="ty", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+		self.widgets["win"] = cmds.window("shiftWin", t="zbw_animShift", w=330, h=500)
+		self.widgets["mainCLO"] = cmds.columnLayout()
 
-	widgets["origTzFFG"] = cmds.floatFieldGrp(l="tz", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["modTzFFG"] = cmds.floatFieldGrp(l="tz", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["difTzFFG"] = cmds.floatFieldGrp(l="tz", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+		self.widgets["getBaseBut"]  = cmds.button(l="1. Set Base Object and Frame To Drive Shift", w=330, h=40, bgc=(.6,.8,.6), c=self.getBase)
+		self.widgets["baseTFG"] = cmds.textFieldGrp(l="Base Object", cal=((1,"left"), (2,"left")), cw=((1,70),(2,250)), ed=False)
+		self.widgets["baseFrameFFG"] = cmds.floatFieldGrp(l="Base Frame", cal = ((1, "left"), (2,"left")), cw=((1,100), (2,50)), pre=2, en=False)
 
-	cmds.separator(style="single", h=5)
-	cmds.separator(style="single", h=5)
-	cmds.separator(style="single", h=5)
+		cmds.separator(h=10)
 
-	widgets["origRxFFG"] = cmds.floatFieldGrp(l="rx", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["modRxFFG"] = cmds.floatFieldGrp(l="rx", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["difRxFFG"] = cmds.floatFieldGrp(l="rx", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+		self.widgets["valueRCL"] = cmds.rowColumnLayout(nc=3, cw=([1,110],[2,110],[3,110]))
+		cmds.text("Orig Values")
+		cmds.text("Modified Values")
+		cmds.text("Difference Value")
 
-	widgets["origRyFFG"] = cmds.floatFieldGrp(l="ry", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["modRyFFG"] = cmds.floatFieldGrp(l="ry", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["difRyFFG"] = cmds.floatFieldGrp(l="ry", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+		cmds.separator(style="single", h=5)
+		cmds.separator(style="single", h=5)
+		cmds.separator(style="single", h=5)
 
-	widgets["origRzFFG"] = cmds.floatFieldGrp(l="rz", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["modRzFFG"] = cmds.floatFieldGrp(l="rz", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["difRzFFG"] = cmds.floatFieldGrp(l="rz", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+		self.widgets["origTxFFG"] = cmds.floatFieldGrp(l="tx", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["modTxFFG"] = cmds.floatFieldGrp(l="tx", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["difTxFFG"] = cmds.floatFieldGrp(l="tx", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
 
-	cmds.separator(style="single", h=5)
-	cmds.separator(style="single", h=5)
-	cmds.separator(style="single", h=5)
+		self.widgets["origTyFFG"] = cmds.floatFieldGrp(l="ty", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["modTyFFG"] = cmds.floatFieldGrp(l="ty", pre=5, cal=([1,"left"], [2, "left"]),  en=False,cw=([1, 30], [2,75]))
+		self.widgets["difTyFFG"] = cmds.floatFieldGrp(l="ty", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
 
-	widgets["origSxFFG"] = cmds.floatFieldGrp(l="sx", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["modSxFFG"] = cmds.floatFieldGrp(l="sx", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["difSxFFG"] = cmds.floatFieldGrp(l="sx", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+		self.widgets["origTzFFG"] = cmds.floatFieldGrp(l="tz", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["modTzFFG"] = cmds.floatFieldGrp(l="tz", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["difTzFFG"] = cmds.floatFieldGrp(l="tz", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
 
-	widgets["origSyFFG"] = cmds.floatFieldGrp(l="sy", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["modSyFFG"] = cmds.floatFieldGrp(l="sy", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["difSyFFG"] = cmds.floatFieldGrp(l="sy", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+		cmds.separator(style="single", h=5)
+		cmds.separator(style="single", h=5)
+		cmds.separator(style="single", h=5)
 
-	widgets["origSzFFG"] = cmds.floatFieldGrp(l="sz", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
-	widgets["modSzFFG"] = cmds.floatFieldGrp(l="sz", pre=5, cal=([1,"left"], [2, "left"]), en=False,cw=([1, 30], [2,75]))
-	widgets["difSzFFG"] = cmds.floatFieldGrp(l="sz", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+		self.widgets["origRxFFG"] = cmds.floatFieldGrp(l="rx", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["modRxFFG"] = cmds.floatFieldGrp(l="rx", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["difRxFFG"] = cmds.floatFieldGrp(l="rx", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
 
-	cmds.separator(style="single", h=5)
-	cmds.separator(style="single", h=5)
-	cmds.separator(style="single", h=5)
+		self.widgets["origRyFFG"] = cmds.floatFieldGrp(l="ry", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["modRyFFG"] = cmds.floatFieldGrp(l="ry", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["difRyFFG"] = cmds.floatFieldGrp(l="ry", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
 
-	cmds.setParent(widgets["mainCLO"])
-#TO-DO----------------	#checkbox to unlock (or enable) th second and third (difference) column?
+		self.widgets["origRzFFG"] = cmds.floatFieldGrp(l="rz", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["modRzFFG"] = cmds.floatFieldGrp(l="rz", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["difRzFFG"] = cmds.floatFieldGrp(l="rz", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
 
-	#button to capture and calculate changes to the anim curves
-	widgets["captureBut"] = cmds.button(l="Calculate and Capture Changed Values", w=450, h=40, bgc=(.8,.6,.6), c=captureChanges)
-	cmds.separator(style="single", h=10)
-#TO-DO----------------	#button to clear the base object (and the values)
+		cmds.separator(style="single", h=5)
+		cmds.separator(style="single", h=5)
+		cmds.separator(style="single", h=5)
 
-#TO-DO----------------	#button to move the selected objects curves to the offset values
-	widgets["baseMoveBut"] = cmds.button(l="Change the Anim Curves for Selected Objects!", w=450, h=40, bgc=(.6,.6,.8), c= shiftAnim)
-#TO-DO----------------check and see if there is a keyframe at the current time in the orig animation
-#TO-DO----------------if NOT then checkbox to see if we should keep that key (only happens on base OBJ)
+		self.widgets["origSxFFG"] = cmds.floatFieldGrp(l="sx", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["modSxFFG"] = cmds.floatFieldGrp(l="sx", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["difSxFFG"] = cmds.floatFieldGrp(l="sx", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
 
-#TO-DO----------------button to change OTHER objects (don't have to worry about undoing keyframes)
+		self.widgets["origSyFFG"] = cmds.floatFieldGrp(l="sy", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["modSyFFG"] = cmds.floatFieldGrp(l="sy", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["difSyFFG"] = cmds.floatFieldGrp(l="sy", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+
+		self.widgets["origSzFFG"] = cmds.floatFieldGrp(l="sz", pre=5, cal=([1,"left"], [2, "left"]), en=False, cw=([1, 30], [2,75]))
+		self.widgets["modSzFFG"] = cmds.floatFieldGrp(l="sz", pre=5, cal=([1,"left"], [2, "left"]), en=False,cw=([1, 30], [2,75]))
+		self.widgets["difSzFFG"] = cmds.floatFieldGrp(l="sz", pre=5, cal=([1,"left"], [2, "left"]), cw=([1, 30], [2,75]))
+
+		cmds.separator(style="single", h=5)
+		cmds.separator(style="single", h=5)
+		cmds.separator(style="single", h=5)
+
+		cmds.setParent(self.widgets["mainCLO"])
+
+		#button to capture and calculate changes to the anim curves
+		self.widgets["captureBut"] = cmds.button(l="2. Calculate and Capture Changed Values", w=330, h=30, bgc=(.8,.8,.6), c=self.captureChanges)
+
+		cmds.separator(style="single", h=5)
+
+		self.widgets["moveBut"] = cmds.button(l="3. Shift the Anim Curves for Selected Objects!", w=330, h=30, bgc=(.6,.6,.8), c=self.shiftAnim)
+
+		cmds.separator(style="single", h=10)
+
+		self.widgets["clearButton"] = cmds.button(l="Clear All Values!", w=330, h=30, bgc=(.8,.6,.6), c=self.clearAll)
+
+		cmds.showWindow(self.widgets["win"])
+		cmds.window(self.widgets["win"], e=True, w=330, h=500)
 
 
-	cmds.showWindow(widgets["win"])
-	cmds.window(widgets["win"], e=True, w=450, h=500)
+	#####functions#####
+	def getBase(self, *args):
 
+		sel = cmds.ls(sl=True, type="transform", l=True)
 
-#####functions
-def getBase(*args):
-	#TO-DO----------------here check if the indiv channels have a key on them, store this info in checkbox?
-	sel = cmds.ls(sl=True, type="transform", l=True)
+		if len(sel)>1:
+			cmds.warning("You've selected more than one object. Only one object can be the base of the animation shift")
+		else:
+			obj = sel[0]
+			#put sel in the base obj tfg and get the frame
+			cmds.textFieldGrp(self.widgets["baseTFG"], e=True, tx=obj)
+			self.frame = cmds.currentTime(q=True)
+			cmds.floatFieldGrp(self.widgets["baseFrameFFG"], e=True, v1=self.frame)
 
-	if len(sel)>1:
-		cmds.warning("You've selected more than one object. Only one object can be the base of the animation shift")
-	else:
-		obj = sel[0]
-		#put sel in the base obj tfg and get the frame
-		cmds.textFieldGrp(widgets["baseTFG"], e=True, tx=obj)
-		frame = cmds.currentTime(q=True)
-		cmds.floatFieldGrp(widgets["baseFrameFFG"], e=True, v1=frame)
+			btx = cmds.getAttr("%s.tx"%obj)
+			bty = cmds.getAttr("%s.ty"%obj)
+			btz = cmds.getAttr("%s.tz"%obj)
 
-		btx = cmds.getAttr("%s.tx"%obj)
-		bty = cmds.getAttr("%s.ty"%obj)
-		btz = cmds.getAttr("%s.tz"%obj)
+			brx = cmds.getAttr("%s.rx"%obj)
+			bry = cmds.getAttr("%s.ry"%obj)
+			brz = cmds.getAttr("%s.rz"%obj)
 
-		brx = cmds.getAttr("%s.rx"%obj)
-		bry = cmds.getAttr("%s.ry"%obj)
-		brz = cmds.getAttr("%s.rz"%obj)
+			bsx = cmds.getAttr("%s.sx"%obj)
+			bsy = cmds.getAttr("%s.sy"%obj)
+			bsz = cmds.getAttr("%s.sz"%obj)
 
-		bsx = cmds.getAttr("%s.sx"%obj)
-		bsy = cmds.getAttr("%s.sy"%obj)
-		bsz = cmds.getAttr("%s.sz"%obj)
+			cmds.floatFieldGrp(self.widgets["origTxFFG"], e=True, v1=btx)
+			cmds.floatFieldGrp(self.widgets["origTyFFG"], e=True, v1=bty)
+			cmds.floatFieldGrp(self.widgets["origTzFFG"], e=True, v1=btz)
 
-		cmds.floatFieldGrp(widgets["origTxFFG"], e=True, v1=btx)
-		cmds.floatFieldGrp(widgets["origTyFFG"], e=True, v1=bty)
-		cmds.floatFieldGrp(widgets["origTzFFG"], e=True, v1=btz)
+			cmds.floatFieldGrp(self.widgets["origRxFFG"], e=True, v1=brx)
+			cmds.floatFieldGrp(self.widgets["origRyFFG"], e=True, v1=bry)
+			cmds.floatFieldGrp(self.widgets["origRzFFG"], e=True, v1=brz)
 
-		cmds.floatFieldGrp(widgets["origRxFFG"], e=True, v1=brx)
-		cmds.floatFieldGrp(widgets["origRyFFG"], e=True, v1=bry)
-		cmds.floatFieldGrp(widgets["origRzFFG"], e=True, v1=brz)
+			cmds.floatFieldGrp(self.widgets["origSxFFG"], e=True, v1=bsx)
+			cmds.floatFieldGrp(self.widgets["origSyFFG"], e=True, v1=bsy)
+			cmds.floatFieldGrp(self.widgets["origSzFFG"], e=True, v1=bsz)
 
-		cmds.floatFieldGrp(widgets["origSxFFG"], e=True, v1=bsx)
-		cmds.floatFieldGrp(widgets["origSyFFG"], e=True, v1=bsy)
-		cmds.floatFieldGrp(widgets["origSzFFG"], e=True, v1=bsz)
+			if cmds.keyframe("%s.tx"%(obj), q=True, t=(self.frame, self.frame)):
+				self.txk = True
+			if cmds.keyframe("%s.ty"%(obj), q=True, t=(self.frame, self.frame)):
+				self.tyk = True
+			if cmds.keyframe("%s.tz"%obj, q=True, t=(self.frame, self.frame)):
+				self.tzk = True
 
-def captureChanges(*args):
-		obj = cmds.textFieldGrp(widgets["baseTFG"], q=True, tx=True)
-		frame = cmds.floatFieldGrp(widgets["baseFrameFFG"], q=True, v1=True)
+			if cmds.keyframe("%s.rx"%(obj), q=True, t=(self.frame, self.frame)):
+				self.rxk = True
+			if cmds.keyframe("%s.ry"%(obj), q=True, t=(self.frame, self.frame)):
+				self.ryk = True
+			if cmds.keyframe("%s.rz"%obj, q=True, t=(self.frame, self.frame)):
+				self.rzk = True
+
+			if cmds.keyframe("%s.sx"%(obj), q=True, t=(self.frame, self.frame)):
+				self.sxk = True
+			if cmds.keyframe("%s.sy"%(obj), q=True, t=(self.frame, self.frame)):
+				self.syk = True
+			if cmds.keyframe("%s.sz"%obj, q=True, t=(self.frame, self.frame)):
+				self.szk = True
+
+	def captureChanges(self, *args):
+		"""method to capture value changes"""
+#TO-DO----------------check to make sure there is somethign in the base object
+		obj = cmds.textFieldGrp(self.widgets["baseTFG"], q=True, tx=True)
+		frame = cmds.floatFieldGrp(self.widgets["baseFrameFFG"], q=True, v1=True)
 		cmds.currentTime(frame, edit=True)
 
 		#poplulate the second column with the new values from the base object
@@ -165,30 +200,30 @@ def captureChanges(*args):
 		msy = cmds.getAttr("%s.sy"%obj)
 		msz = cmds.getAttr("%s.sz"%obj)
 
-		cmds.floatFieldGrp(widgets["modTxFFG"], e=True, v1=mtx)
-		cmds.floatFieldGrp(widgets["modTyFFG"], e=True, v1=mty)
-		cmds.floatFieldGrp(widgets["modTzFFG"], e=True, v1=mtz)
+		cmds.floatFieldGrp(self.widgets["modTxFFG"], e=True, v1=mtx)
+		cmds.floatFieldGrp(self.widgets["modTyFFG"], e=True, v1=mty)
+		cmds.floatFieldGrp(self.widgets["modTzFFG"], e=True, v1=mtz)
 
-		cmds.floatFieldGrp(widgets["modRxFFG"], e=True, v1=mrx)
-		cmds.floatFieldGrp(widgets["modRyFFG"], e=True, v1=mry)
-		cmds.floatFieldGrp(widgets["modRzFFG"], e=True, v1=mrz)
+		cmds.floatFieldGrp(self.widgets["modRxFFG"], e=True, v1=mrx)
+		cmds.floatFieldGrp(self.widgets["modRyFFG"], e=True, v1=mry)
+		cmds.floatFieldGrp(self.widgets["modRzFFG"], e=True, v1=mrz)
 
-		cmds.floatFieldGrp(widgets["modSxFFG"], e=True, v1=msx)
-		cmds.floatFieldGrp(widgets["modSyFFG"], e=True, v1=msy)
-		cmds.floatFieldGrp(widgets["modSzFFG"], e=True, v1=msz)
+		cmds.floatFieldGrp(self.widgets["modSxFFG"], e=True, v1=msx)
+		cmds.floatFieldGrp(self.widgets["modSyFFG"], e=True, v1=msy)
+		cmds.floatFieldGrp(self.widgets["modSzFFG"], e=True, v1=msz)
 
 		#get orig values
-		otx = cmds.floatFieldGrp(widgets["origTxFFG"], q=True, v1=True)
-		oty = cmds.floatFieldGrp(widgets["origTyFFG"], q=True, v1=True)
-		otz = cmds.floatFieldGrp(widgets["origTzFFG"], q=True, v1=True)
+		otx = cmds.floatFieldGrp(self.widgets["origTxFFG"], q=True, v1=True)
+		oty = cmds.floatFieldGrp(self.widgets["origTyFFG"], q=True, v1=True)
+		otz = cmds.floatFieldGrp(self.widgets["origTzFFG"], q=True, v1=True)
 
-		orx = cmds.floatFieldGrp(widgets["origRxFFG"], q=True, v1=True)
-		ory = cmds.floatFieldGrp(widgets["origRyFFG"], q=True, v1=True)
-		orz = cmds.floatFieldGrp(widgets["origRzFFG"], q=True, v1=True)
+		orx = cmds.floatFieldGrp(self.widgets["origRxFFG"], q=True, v1=True)
+		ory = cmds.floatFieldGrp(self.widgets["origRyFFG"], q=True, v1=True)
+		orz = cmds.floatFieldGrp(self.widgets["origRzFFG"], q=True, v1=True)
 
-		osx = cmds.floatFieldGrp(widgets["origSxFFG"], q=True, v1=True)
-		osy = cmds.floatFieldGrp(widgets["origSyFFG"], q=True, v1=True)
-		osz = cmds.floatFieldGrp(widgets["origSzFFG"], q=True, v1=True)
+		osx = cmds.floatFieldGrp(self.widgets["origSxFFG"], q=True, v1=True)
+		osy = cmds.floatFieldGrp(self.widgets["origSyFFG"], q=True, v1=True)
+		osz = cmds.floatFieldGrp(self.widgets["origSzFFG"], q=True, v1=True)
 
 		#now subtract them and put the value in the diff column
 		dtx = mtx - otx
@@ -203,58 +238,109 @@ def captureChanges(*args):
 		dsy = msy - osy
 		dsz = msz - osz
 
-		cmds.floatFieldGrp(widgets["difTxFFG"], e=True, v1=dtx)
-		cmds.floatFieldGrp(widgets["difTyFFG"], e=True, v1=dty)
-		cmds.floatFieldGrp(widgets["difTzFFG"], e=True, v1=dtz)
+		cmds.floatFieldGrp(self.widgets["difTxFFG"], e=True, v1=dtx)
+		cmds.floatFieldGrp(self.widgets["difTyFFG"], e=True, v1=dty)
+		cmds.floatFieldGrp(self.widgets["difTzFFG"], e=True, v1=dtz)
 
-		cmds.floatFieldGrp(widgets["difRxFFG"], e=True, v1=drx)
-		cmds.floatFieldGrp(widgets["difRyFFG"], e=True, v1=dry)
-		cmds.floatFieldGrp(widgets["difRzFFG"], e=True, v1=drz)
+		cmds.floatFieldGrp(self.widgets["difRxFFG"], e=True, v1=drx)
+		cmds.floatFieldGrp(self.widgets["difRyFFG"], e=True, v1=dry)
+		cmds.floatFieldGrp(self.widgets["difRzFFG"], e=True, v1=drz)
 
-		cmds.floatFieldGrp(widgets["difSxFFG"], e=True, v1=dsx)
-		cmds.floatFieldGrp(widgets["difSyFFG"], e=True, v1=dsy)
-		cmds.floatFieldGrp(widgets["difSzFFG"], e=True, v1=dsz)
+		cmds.floatFieldGrp(self.widgets["difSxFFG"], e=True, v1=dsx)
+		cmds.floatFieldGrp(self.widgets["difSyFFG"], e=True, v1=dsy)
+		cmds.floatFieldGrp(self.widgets["difSzFFG"], e=True, v1=dsz)
 
 
-def shiftAnim(*args):
-	#TO-DO----------------if obj is base then check about that key on the base frame
-	#get vals of changes for each
-	dtx = cmds.floatFieldGrp(widgets["difTxFFG"], q=True, v1=True)
-	dty = cmds.floatFieldGrp(widgets["difTyFFG"], q=True, v1=True)
-	dtz = cmds.floatFieldGrp(widgets["difTzFFG"], q=True, v1=True)
+	def shiftAnim(self, *args):
+		"""method that does the shifting"""
+		base = cmds.textFieldGrp(self.widgets["baseTFG"], q=True, tx=True)
 
-	drx = cmds.floatFieldGrp(widgets["difRxFFG"], q=True, v1=True)
-	dry = cmds.floatFieldGrp(widgets["difRyFFG"], q=True, v1=True)
-	drz = cmds.floatFieldGrp(widgets["difRzFFG"], q=True, v1=True)
+		#get vals of changes for each
+		dtx = cmds.floatFieldGrp(self.widgets["difTxFFG"], q=True, v1=True)
+		dty = cmds.floatFieldGrp(self.widgets["difTyFFG"], q=True, v1=True)
+		dtz = cmds.floatFieldGrp(self.widgets["difTzFFG"], q=True, v1=True)
 
-	dsx = cmds.floatFieldGrp(widgets["difSxFFG"], q=True, v1=True)
-	dsy = cmds.floatFieldGrp(widgets["difSyFFG"], q=True, v1=True)
-	dsz = cmds.floatFieldGrp(widgets["difSzFFG"], q=True, v1=True)
+		drx = cmds.floatFieldGrp(self.widgets["difRxFFG"], q=True, v1=True)
+		dry = cmds.floatFieldGrp(self.widgets["difRyFFG"], q=True, v1=True)
+		drz = cmds.floatFieldGrp(self.widgets["difRzFFG"], q=True, v1=True)
 
-	sel = cmds.ls(sl=True, type="transform", l=True)
+		dsx = cmds.floatFieldGrp(self.widgets["difSxFFG"], q=True, v1=True)
+		dsy = cmds.floatFieldGrp(self.widgets["difSyFFG"], q=True, v1=True)
+		dsz = cmds.floatFieldGrp(self.widgets["difSzFFG"], q=True, v1=True)
 
-	for obj in sel:
-		cmds.keyframe(sel, at=("tx"), r=True, vc=dtx)
-		cmds.keyframe(sel, at=("ty"), r=True, vc=dty)
-		cmds.keyframe(sel, at=("tz"), r=True, vc=dtz)
+		sel = cmds.ls(sl=True, type="transform", l=True)
 
-		cmds.keyframe(sel, at=("rx"), r=True, vc=drx)
-		cmds.keyframe(sel, at=("ry"), r=True, vc=dry)
-		cmds.keyframe(sel, at=("rz"), r=True, vc=drz)
+		if sel:
+			for obj in sel:
+				cmds.keyframe(obj, at=("tx"), r=True, vc=dtx)
+				cmds.keyframe(obj, at=("ty"), r=True, vc=dty)
+				cmds.keyframe(obj, at=("tz"), r=True, vc=dtz)
 
-		cmds.keyframe(sel, at=("sx"), r=True, vc=dsx)
-		cmds.keyframe(sel, at=("sy"), r=True, vc=dsy)
-		cmds.keyframe(sel, at=("sz"), r=True, vc=dsz)
-#BELOW IS ONLY IF obj is base obj
-#TO-DO----------------if the anim curve HAD a key at the base frame, offset it back by the neg value of the delta
-#TO-DO----------------if NOT then delete the key here
+				cmds.keyframe(obj, at=("rx"), r=True, vc=drx)
+				cmds.keyframe(obj, at=("ry"), r=True, vc=dry)
+				cmds.keyframe(obj, at=("rz"), r=True, vc=drz)
 
-def clearBase(*args):
-	pass
+				cmds.keyframe(obj, at=("sx"), r=True, vc=dsx)
+				cmds.keyframe(obj, at=("sy"), r=True, vc=dsy)
+				cmds.keyframe(obj, at=("sz"), r=True, vc=dsz)
 
-def enableDiff(*args):
-	pass
+				if obj==base:
+					if self.txk:
+						#offset the value BACK at self.frame
+						cmds.keyframe(obj, at="tx", r=True, vc=-self.dtx, t=(self.frame, self.frame))
+					else:
+						#delete the key at self.frame if it exists
+						cmds.cutKey(obj, at="tx", t=(self.frame, self.frame), cl=True)
+					if self.tyk:
+						cmds.keyframe(obj, at="ty", r=True, vc=-self.dty, t=(self.frame, self.frame))
+					else:
+						cmds.cutKey(obj, at="ty", t=(self.frame, self.frame), cl=True)
+					if self.tzk:
+						cmds.keyframe(obj, at="tz", r=True, vc=-self.dtz, t=(self.frame, self.frame))
+					else:
+						cmds.cutKey(obj, at="tz", t=(self.frame, self.frame), cl=True)
+
+					if self.rxk:
+						cmds.keyframe(obj, at="rx", r=True, vc=-self.drx, t=(self.frame, self.frame))
+					else:
+						cmds.cutKey(obj, at="rx", t=(self.frame, self.frame), cl=True)
+					if self.ryk:
+						cmds.keyframe(obj, at="ry", r=True, vc=-self.dry, t=(self.frame, self.frame))
+					else:
+						cmds.cutKey(obj, at="ry", t=(self.frame, self.frame), cl=True)
+					if self.rzk:
+						cmds.keyframe(obj, at="rz", r=True, vc=-self.drz, t=(self.frame, self.frame))
+					else:
+						cmds.cutKey(obj, at="rz", t=(self.frame, self.frame), cl=True)
+
+					if self.sxk:
+						cmds.keyframe(obj, at="sx", r=True, vc=-self.dsx, t=(self.frame, self.frame))
+					else:
+						cmds.cutKey(obj, at="sx", t=(self.frame, self.frame), cl=True)
+					if self.syk:
+						cmds.keyframe(obj, at="sy", r=True, vc=-self.dsy, t=(self.frame, self.frame))
+					else:
+						cmds.cutKey(obj, at="sy", t=(self.frame, self.frame), cl=True)
+					if self.szk:
+						cmds.keyframe(obj, at="sz", r=True, vc=-self.dsz, t=(self.frame, self.frame))
+					else:
+						cmds.cutKey(obj, at="sz", t=(self.frame, self.frame), cl=True)
+
+
+		else:
+			cmds.warning("You've unselected stuff and you need some selections to shift!")
+
+		#clear base object (so we don't double up on keyframe corrections)
+		cmds.textFieldGrp(self.widgets["baseTFG"], e=True, tx="")
+
+	def clearAll(self, *args):
+		"""clears all the fields"""
+		fieldNames = ["origTxFFG", "origTyFFG", "origTzFFG", "origSxFFG", "origSyFFG", "origSzFFG", "origRxFFG", "origRyFFG", "origRzFFG", "modTxFFG", "modTyFFG", "modTzFFG", "modRxFFG", "modRyFFG", "modRzFFG", "modSxFFG", "modSyFFG", "modSzFFG", "difTxFFG", "difTyFFG", "difTzFFG", "difRxFFG", "difRyFFG", "difRzFFG", "difSxFFG", "difSyFFG", "difSzFFG"]
+		cmds.textFieldGrp(self.widgets["baseTFG"], e=True, tx="")
+		for field in fieldNames:
+			cmds.floatFieldGrp(self.widgets[field], e=True, v1=0)
+		cmds.floatFieldGrp(self.widgets["baseFrameFFG"], e=True, v1=0)
 
 
 def animShift(*args):
-	shiftUI()
+	thisShift = AnimShift()
