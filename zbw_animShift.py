@@ -7,8 +7,7 @@
 #notes:
 ########################
 
-#TO-DO------ ----------add in time options (range, slider, all)
-#TO-DO----------------reload last base? Store this as variable (self.base) button to do this
+#TO-DO------ ----------add in time options (range, slider, all) to UI and then to the rest of the script
 
 import maya.cmds as cmds
 
@@ -30,6 +29,8 @@ class AnimShift(object):
 		self.syk=False
 		self.szk=False
 
+		self.baseObj = ""
+
 		self.shiftUI()
 
 	def shiftUI(self, *args):
@@ -40,6 +41,13 @@ class AnimShift(object):
 
 		self.widgets["win"] = cmds.window("shiftWin", t="zbw_animShift", w=330, h=500)
 		self.widgets["mainCLO"] = cmds.columnLayout()
+
+
+#TO-DO----------------create time options here (all, time slider, range)
+		self.widgets["timeRBG"] = cmds.radioButtonGrp(nrb=3, l1="All", l2="Time Slider", l3="Range")
+		self.widgets["rangeFFG"] = cmds.floatFieldGrp(l="Start/End Frames", nf=2, v1=0, v2=10)
+
+		cmds.separator(h=5, style="single")
 
 		self.widgets["getBaseBut"]  = cmds.button(l="1. Set Base Object and Frame To Drive Shift", w=330, h=40, bgc=(.6,.8,.6), c=self.getBase)
 		self.widgets["baseTFG"] = cmds.textFieldGrp(l="Base Object", cal=((1,"left"), (2,"left")), cw=((1,70),(2,250)), ed=False)
@@ -115,8 +123,10 @@ class AnimShift(object):
 
 		cmds.separator(style="single", h=10)
 
-		self.widgets["clearButton"] = cmds.button(l="Clear All Values!", w=330, h=30, bgc=(.8,.6,.6), c=self.clearAll)
-
+		#2 column layout to spread these two buttons
+		self.widgets["bottomButtonRCL"] = cmds.rowColumnLayout(nc=2, w=330, cw=((1,250), (2,80)))
+		self.widgets["clearButton"] = cmds.button(l="Clear All Values!", w=250, h=30, bgc=(.8,.6,.6), c=self.clearAll)
+		self.widgets["restoreButton"] = cmds.button(l="Restore Base", w=80, h=30, bgc=(.8,.5,.5), c=self.restoreBase)
 		cmds.showWindow(self.widgets["win"])
 		cmds.window(self.widgets["win"], e=True, w=330, h=500)
 
@@ -179,6 +189,9 @@ class AnimShift(object):
 				self.syk = True
 			if cmds.keyframe("%s.sz"%obj, q=True, t=(self.frame, self.frame)):
 				self.szk = True
+
+			#catch the base object  and frame for later use
+			self.baseObj = obj
 
 	def captureChanges(self, *args):
 		"""method to capture value changes"""
@@ -253,6 +266,12 @@ class AnimShift(object):
 
 	def shiftAnim(self, *args):
 		"""method that does the shifting"""
+
+#TO-DO----------------call the frame range option
+		#actually do this with a separate function
+		self.startF = 0
+		self.endF = 1
+
 		base = cmds.textFieldGrp(self.widgets["baseTFG"], q=True, tx=True)
 
 		#get vals of changes for each
@@ -341,6 +360,21 @@ class AnimShift(object):
 			cmds.floatFieldGrp(self.widgets[field], e=True, v1=0)
 		cmds.floatFieldGrp(self.widgets["baseFrameFFG"], e=True, v1=0)
 
+
+	def restoreBase(self, *args):
+		"""restores the base obj to the text field"""
+
+		cmds.textFieldGrp(self.widgets["baseTFG"], e=True, tx=self.baseObj)
+		cmds.floatFieldGrp(self.widgets["baseFrameFFG"], e=True, v1=self.frame)
+
+#TO-DO----------------get frame ranges from UI, switch out options for enabled frame range
+	def enableRange(self, *args):
+		pass
+
+
+	def getRange(self, *args):
+		"""this finds the frame range and returns the StartFrame and EndFrame"""
+		pass
 
 def animShift(*args):
 	thisShift = AnimShift()
