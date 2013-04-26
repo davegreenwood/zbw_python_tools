@@ -20,7 +20,7 @@ def appendUI():
 	if cmds.window("appendPath", exists=True):
 		cmds.deleteUI("appendPath")
 
-	widgets["win"] = cmds.window("appendPath", t="zbw_appendPath", w=500, h=190)
+	widgets["win"] = cmds.window("appendPath", t="zbw_appendPath", w=500, h=190, s=False)
 
 	#create some menus for saving and loading
 	cmds.setParent(widgets["win"])
@@ -35,9 +35,17 @@ def appendUI():
 	widgets["path1"] = cmds.textFieldButtonGrp(l="path1", cal=[(1, "left"), (2,"left"),(3,"left")], cw3=(40, 410, 50), bl="<<<", bc=partial(addToField, 1))
 	widgets["path2"] = cmds.textFieldButtonGrp(l="path2", cal=[(1, "left"), (2,"left"),(3,"left")], cw3=(40, 410, 50), bl="<<<", bc=partial(addToField, 2))
 	widgets["path3"] = cmds.textFieldButtonGrp(l="path3", cal=[(1, "left"), (2,"left"),(3,"left")], cw3=(40, 410, 50), bl="<<<", bc=partial(addToField, 3))
+
 	cmds.separator(h=10, st="single")
-	widgets["AddBut"] = cmds.button(l="Add paths to sys.path", w=500, h=30, bgc=(.6, .5, .5), c=append)
+
+	widgets["buttonRCL"] = cmds.rowColumnLayout(nc=3, w=500, cw=[(1,123),(2,247 ),(3,123)])
+	widgets["addCloseBut"] = cmds.button(l="Add Paths", w=120, h=30, bgc=(.6, .8, .6), c=apply)
+	widgets["addBut"] = cmds.button(l="Add Paths and Close", w=245, h=30, bgc=(.8, .8, .6), c=applyClose)
+	widgets["closeBut"] = cmds.button(l="Close", w=120, h=30, bgc=(.8,.6,.6), c=close)
+
+	cmds.setParent(widgets["columnLO"])
 	cmds.separator(h=5, style="single")
+
 	cmds.text("Click the '<<<' buttons to browse for paths to add. Click the 'Add' button to add those \npaths to the 'sys.path' list. Use the 'ViewPath' tab to view current list of paths.", al="center")
 	cmds.text("Use 'file->save' to save the selected paths. Use 'file->load' to load previously saved paths")
 
@@ -62,6 +70,16 @@ def appendUI():
 
 	cmds.showWindow(widgets["win"])
 	cmds.window(widgets["win"], e=True, w=500, h=190)
+
+def apply(*args):
+	append()
+
+def applyClose(*args):
+	apply()
+	close()
+
+def close(*args):
+	cmds.deleteUI("appendPath")
 
 def bottomPath(*args):
 	"""function to move path of selected index to the bottom of the list"""
