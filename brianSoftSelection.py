@@ -41,7 +41,7 @@ print weights
 #get transform and mesh
 xform = elements[0].partition(".")[0]
 #maybe here I should check for "orig", etc and exclude them?
-mesh = cmds.listRelatives(xform, s=True)[0]
+mesh = cmds.listRelatives(xform, f=True, s=True)[0]
 
 #select each of the points from the list and create a cluster
 cmds.select(cl=True)
