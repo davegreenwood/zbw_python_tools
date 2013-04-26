@@ -4,7 +4,7 @@
 #contact: zeth@catbuks.com, www.williework.blogspot.com
 #date modified: 4/19/13
 #
-#notes: place in scripts folder (or other location in the sys.path) and in python tab, type "import zbw_cleanKeys;zbw_cleanKeys.cleanKeys()"
+#notes: place in scripts folder (or other location in the sys.path) and in python tab, type "import zbw_cleanKeys;zbw_cleanKeys.cleanKeys()". This cleans your keyframes. Duh. There's also a global change tangent tab, too.
 ########################
 
 import maya.cmds as cmds
@@ -15,17 +15,17 @@ def cleanUI(*args):
     """the UI for the clean/tangent functions"""
     if cmds.window("cleanWin", exists=True):
         cmds.deleteUI("cleanWin")
-        
+
     widgets["win"] = cmds.window("cleanWin", w=300, h=220)
     widgets["mainCLO"] = cmds.columnLayout()
     widgets["tabLO"] = cmds.tabLayout()
-    
+
     widgets["cleanCLO"] = cmds.columnLayout("Clean Keys")
     #some explanation
     cmds.text("Options for which keys to clean/delete:")
     cmds.separator(h=10)
     #radio button group for all selected or for hierarchy under selected
-    widgets["hierarchyRBG"] = cmds.radioButtonGrp(nrb=2, l1="Selected Objs Only", l2="Hierarchy Under Selected", sl=2, cc=enableCurve)    
+    widgets["hierarchyRBG"] = cmds.radioButtonGrp(nrb=2, l1="Selected Objs Only", l2="Hierarchy Under Selected", sl=2, cc=enableCurve)
     #radioButtons for time (timeslider, all anim, range)
     widgets["timeRBG"] = cmds.radioButtonGrp(nrb=3,l1="Timeslider", l2="All Anim", l3="Frame Range", sl=2, cw=[(1,100),(2,75),(3,75)] ,cc=partial(enableFR, "timeRBG", "frameRangeIFG", "keepCBG"))
     #int field group for frame range
@@ -33,36 +33,35 @@ def cleanUI(*args):
 
 
     #radio button group for nurbs curves only or for all transforms
-    widgets["curvesRBG"] = cmds.radioButtonGrp(nrb=2, l1="Curves/Volume Primatives Only", l2="All DAG", sl=1, cw=[(1, 170),(2, 130)])
+    widgets["curvesRBG"] = cmds.radioButtonGrp(nrb=2, l1="Curves/Volume Primatives Only", l2="All DAG", sl=1, cw=[(1, 190),(2, 110)])
 
     cmds.separator(h=10, style="single")
-    
+
     #area to create/keep buffer curves
     widgets["bufCBG"] = cmds.checkBoxGrp(ncb=2, l1="Buffer Original Curve", l2="Overwrite Existing Buffer", v1=1, v2=0, cw=([1, 140], [2,50], [3,100], [4,50]), cal=([1, "left"], [2,"left"], [3,"left"],[4,"left"]))
 
-    cmds.separator(h=10, style="single")    
-    #check box for singlets and couplets    
+    cmds.separator(h=10, style="single")
+    #check box for singlets and couplets
     cmds.text("Singletons have only one key. Couplets have only 2 keys")
     widgets["keepCBG"] = cmds.checkBoxGrp(ncb=2, l1="Keep Singletons", l2="Keep Identical Couplets", v1=0, v2=0)
 
     cmds.separator(h=10)
     widgets["cleanBut"] = cmds.button(l="Clean Animation Curves!", w=300, h=40, bgc=(.6,.8,.6), c=clean)
-    
+
     #tab for changing all tangent types
     cmds.setParent(widgets["tabLO"])
     widgets["tangentCLO"] = cmds.columnLayout("Tangents")
-    
-    cmds.text("here is where I'll put the shit for tangents")
+
     #radioButtons for tangent type (step, linear, auto, spline)
     widgets["tangentType"] = cmds.radioButtonGrp(nrb=4, l1="Step", l2="Linear", l3="Spline", l4="Auto", sl=1, cw=[(1,50),(2,50),(3,50),(4,50)])
     #radio button group for all selected or for hierarchy under selected
-    widgets["tanHierRBG"] = cmds.radioButtonGrp(nrb=2, l1="Selected Objs Only", l2="Hierarchy Under Selected", sl=2, cc=enableSelect)    
+    widgets["tanHierRBG"] = cmds.radioButtonGrp(nrb=2, l1="Selected Objs Only", l2="Hierarchy Under Selected", sl=2, cc=enableSelect)
     #radioButtons for time (timeslider, all anim, range)
     widgets["tanTimeRBG"] = cmds.radioButtonGrp(nrb=3,l1="Timeslider", l2="All Anim", l3="Frame Range", sl=2, cw=[(1,100),(2,75),(3,75)],cc=partial(enableFR,"tanTimeRBG","tanFrameRangeIFG"))
     #int field group for frame range
     widgets["tanFrameRangeIFG"] = cmds.intFieldGrp(nf=2, l="Start/End", v1=1, v2=24, en=False, cal=[(1,"left"),(2,"left"),(3,"left")], cw=[(1,75),(2,75),(3,75)])
     #radioButtons for curves only or for all DAG objects
-    widgets["tanCurvesRBG"] = cmds.radioButtonGrp(nrb=2, l1="Curves/Volume Primatives Only", l2="All DAG", sl=1, cw=[(1, 170),(2, 130)])
+    widgets["tanCurvesRBG"] = cmds.radioButtonGrp(nrb=2, l1="Curves/Volume Primatives Only", l2="All DAG", sl=1, cw=[(1, 190),(2, 110)])
     cmds.separator(h=10)
 
     #Button for executing the change
@@ -71,7 +70,7 @@ def cleanUI(*args):
     #button to SELECT those objects rather than change the tangents
     cmds.separator(h=10)
     widgets["selectBut"] = cmds.button(l="Select Objects in Hierarchy", w=300, h=20, bgc=(.8,.6,.6), c=selectHier)
-    
+
     cmds.showWindow(widgets["win"])
     cmds.window(widgets["win"], e=True, w=300, h=220)
 
@@ -84,7 +83,7 @@ def enableSelect(*args):
     else:
         cmds.radioButtonGrp(widgets["tanCurvesRBG"], e=True, en=False)
         cmds.button(widgets["selectBut"], e=True, en=False)
-        
+
 def getSliderRange(*args):
     """gets framerange in current scene and returns start and end frames"""
     #get timeslider range start
@@ -99,23 +98,26 @@ def enableCurve(*args):
         cmds.radioButtonGrp(widgets["curvesRBG"], e=True, en=True)
     else:
         cmds.radioButtonGrp(widgets["curvesRBG"], e=True, en=False)
-    
-def enableFR(source, intField, singles="none", *args):
+
+def enableFR(source, intField, singles=None, *args):
     """when frame range option is selected, this activates the frame range int field group"""
     val = cmds.radioButtonGrp(widgets[source], q=True, sl=True)
     if val==3:
         cmds.intFieldGrp(widgets[intField], e=True, en=True)
-        if singles:
-            cmds.checkBoxGrp(widgets[singles], e=True, en=False)
+        if source == "timeRBG":
+            if singles:
+                cmds.checkBoxGrp(widgets[singles], e=True, en=False)
     elif val==2:
         cmds.intFieldGrp(widgets[intField], e=True, en=False)
-        if singles:
-            cmds.checkBoxGrp(widgets[singles], e=True, en=True)
+        if source == "timeRBG":
+            if singles:
+                cmds.checkBoxGrp(widgets[singles], e=True, en=True)
     elif val==1:
         cmds.intFieldGrp(widgets[intField], e=True, en=False)
-        if singles:
-            cmds.checkBoxGrp(widgets[singles], e=True, en=False)
-        
+        if source == "timeRBG":
+            if singles:
+                cmds.checkBoxGrp(widgets[singles], e=True, en=False)
+
 def clean(*args):
     """this cleans the keyframes based on the settings in clean tab"""
     #get info from options in UI
@@ -129,8 +131,8 @@ def clean(*args):
     tolerance = 0.0001
     #checking buffer settings
     buffer = cmds.checkBoxGrp(widgets["bufCBG"], q=True, v1=True)
-    bufOverwrite = cmds.checkBoxGrp(widgets["bufCBG"], q=True, v2=True)    
-    
+    bufOverwrite = cmds.checkBoxGrp(widgets["bufCBG"], q=True, v2=True)
+
     #get the selection based on the criteria above
     selection = cmds.ls(sl=True, type="transform")
     #this is the selection list to operate on
@@ -150,32 +152,32 @@ def clean(*args):
                 if curveList:
                     for curve in curveList:
                         sel.append(curve)
-            
+
                 for obj in selection:
                     sel.append(obj)
-                            
+
             elif curves == 2:
                 #get transforms without filtering for curves
                 dagList = []
-                for obj in selection:    
+                for obj in selection:
                     transform = cmds.listRelatives(obj, ad=True, f=True, type="transform")
                     if transform:
                         for this in transform:
-                            dagList.append(this)  
+                            dagList.append(this)
 
-                    dagList.append(obj) 
-                
+                    dagList.append(obj)
+
                 for this in dagList:
                     sel.append(this)
-                    
+
         elif hier==1:
             for obj in selection:
                 sel.append(obj)
                 #print "%s is selected"%obj
-        
+
     else:
         cmds.warning("You haven't selected any transform nodes!")
-    
+
     if timeOption == 1:
         #get timeslider range start
         startF = cmds.playbackOptions(query=True, min=True)
@@ -184,30 +186,30 @@ def clean(*args):
         #get frame range from int field
         startF = cmds.intFieldGrp(widgets["frameRangeIFG"], q=True, v1=True)
         endF = cmds.intFieldGrp(widgets["frameRangeIFG"], q=True, v2=True)
-    
+
     #print "The frame range is %s to %s"%(startF, endF)
 
-    #print "this will clean keys for: %s"%sel  
+    #print "this will clean keys for: %s"%sel
     # loop through objects
     for object in sel:
         #create buffer curve
         if buffer:
             cmds.bufferCurve(object, ov=bufOverwrite)
-        
+
         keyedAttr = []
         # find which attr have keys on them
         keyedAttrRaw = cmds.keyframe(object, q=True, name=True)
         #now fix the "object_" part to "object."
         if keyedAttrRaw:
             for oldAttr in keyedAttrRaw:
-                #strip full path to object down to just obj, then use that to parse the attr name 
+                #strip full path to object down to just obj, then use that to parse the attr name
                 onlyObject = object.rpartition("|")[2]
                 newAttr = oldAttr.partition("%s_"%onlyObject)[2]
                 #print "stripped attr = %s, the object I'm stripping is %s"%(newAttr, onlyObject)
                 keyedAttr.append(newAttr)
                 #print "object: %s    attr:%s"%(object, newAttr)
             # loop through attrs with keys
-            for attr in keyedAttr:                
+            for attr in keyedAttr:
                 for a in range(2):
                     keyList = []
                     #time range stuff, if using all anim, don't use frame range. Otherwise use startF, endF
@@ -218,7 +220,7 @@ def clean(*args):
                     #if there are keys, start the looping to check to delete them
                     if (keyList):
                         keySize = len(keyList)
-                        
+
                         if keySize < 3:
                             if keySize < 2:
                                 #currentVal = cmds.getAttr((object+"."+attr), time=keyList[0])
@@ -266,20 +268,20 @@ def clean(*args):
                                 prevDiff = abs(thisVal[0]-prevVal[0])
                                 nextDiff = abs(thisVal[0]-nextVal[0])
                                 if (prevDiff<tolerance) and (nextDiff<tolerance):
-                                    cmds.cutKey(object, at=attr, time=(thisKey,thisKey), cl=True) 
+                                    cmds.cutKey(object, at=attr, time=(thisKey,thisKey), cl=True)
                     else:
                         #print "%s had no keys on %s"%(object, attr)
                         pass
-                        
+
                     #print "this is loop number %s, on attr: %s"%(a, attr)
-           
+
 
 def changeTan(*args):
     """this changes the tangent types of the objects based on settings in the tangent tab"""
     #get selected objects
     hier = cmds.radioButtonGrp(widgets["tanHierRBG"], q=True, sl=True)
     curves = cmds.radioButtonGrp(widgets["tanCurvesRBG"], q=True, sl=True)
-    
+
     selection = cmds.ls(sl=True, type="transform")
     #this is the selection list to operate on
     sel = []
@@ -298,25 +300,30 @@ def changeTan(*args):
                 if curveList:
                     for curve in curveList:
                         sel.append(curve)
-                            
+                for obj in selection:
+                    sel.append(obj)
+
             elif curves == 2:
                 #get transforms without filtering for curves
                 dagList = []
-                for obj in selection:    
+                for obj in selection:
                     transform = cmds.listRelatives(obj, ad=True, f=True, type="transform")
                     if transform:
                         for this in transform:
-                            dagList.append(this)  
+                            dagList.append(this)
                     #add in the object itself
-                    dagList.append(obj) 
-                
+                    dagList.append(obj)
+
                 for this in dagList:
                     sel.append(this)
-                    
+
+                for obj in selection:
+                    sel.append(obj)
+
         elif hier==1:
             for obj in selection:
                 sel.append(obj)
-        
+
     else:
         cmds.warning("You haven't selected any transform nodes!")
     #get framerange
@@ -337,7 +344,7 @@ def changeTan(*args):
         tanType = "spline"
     elif tanNum==4:
         tanType = "auto"
-        
+
     #for keys in range, change tangent type (don't use frame range if rangeRaw==2
     for obj in sel:
         if rangeRaw==2:
@@ -356,7 +363,7 @@ def selectHier(*args):
     #get selected objects
     hier = cmds.radioButtonGrp(widgets["tanHierRBG"], q=True, sl=True)
     curves = cmds.radioButtonGrp(widgets["tanCurvesRBG"], q=True, sl=True)
-    
+
     selection = cmds.ls(sl=True, type="transform")
     #this is the selection list to operate on
     sel = []
@@ -375,31 +382,37 @@ def selectHier(*args):
                 if curveList:
                     for curve in curveList:
                         sel.append(curve)
-                            
+
+                for obj in selection:
+                    sel.append(obj)
+
             elif curves == 2:
                 #get transforms without filtering for curves
                 dagList = []
-                for obj in selection:    
+                for obj in selection:
                     transform = cmds.listRelatives(obj, ad=True, f=True, type="transform")
                     if transform:
                         for this in transform:
-                            dagList.append(this)  
+                            dagList.append(this)
                     #add in the object itself
-                    dagList.append(obj) 
-                
+                    dagList.append(obj)
+
                 for this in dagList:
                     sel.append(this)
-                    
+
+                for obj in selection:
+                    sel.append(obj)
+
         elif hier==1:
             for obj in selection:
                 sel.append(obj)
-                
+
         #now select
         cmds.select(cl=True)
         cmds.select(sel)
-        
+
     else:
         cmds.warning("You don't have any transforms selected!")
-    
+
 def cleanKeys(*args):
     cleanUI()
