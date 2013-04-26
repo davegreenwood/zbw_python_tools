@@ -8,6 +8,8 @@
 ########################
 
 #TO-DO------ ----------add in time options (range, slider, all) to UI and then to the rest of the script
+#TO-DO----------------keep track of whether the shift has happened. Print message. When it HAS happened, then you don't need to do the offset if there was a keyframe there or delete keys if they weren't . Then I can get rid of the "restore" button. 
+
 
 import maya.cmds as cmds
 
@@ -44,8 +46,8 @@ class AnimShift(object):
 
 
 #TO-DO----------------create time options here (all, time slider, range)
-		self.widgets["timeRBG"] = cmds.radioButtonGrp(nrb=3, l1="All", l2="Time Slider", l3="Range")
-		self.widgets["rangeFFG"] = cmds.floatFieldGrp(l="Start/End Frames", nf=2, v1=0, v2=10)
+		self.widgets["timeRBG"] = cmds.radioButtonGrp(l="Range Options:", nrb=3, l1="All", l2="Time Slider", l3="Range", sl=1, cw=([1,100], [2,50],[3,100],[4,50]), cal=(1,"left"), cc=self.enableRange)
+		self.widgets["rangeFFG"] = cmds.floatFieldGrp(l="Start/End Frames", nf=2, v1=0, v2=10, en=False)
 
 		cmds.separator(h=5, style="single")
 
@@ -119,14 +121,14 @@ class AnimShift(object):
 
 		cmds.separator(style="single", h=5)
 
-		self.widgets["moveBut"] = cmds.button(l="3. Shift the Anim Curves for Selected Objects!", w=330, h=30, bgc=(.6,.6,.8), c=self.shiftAnim)
+		self.widgets["moveBut"] = cmds.button(l="3. SHIFT THE ANIM CURVES FOR SELECTED OBJECTS!", w=330, h=30, bgc=(.6,.6,.8), c=self.shiftAnim)
 
 		cmds.separator(style="single", h=10)
 
 		#2 column layout to spread these two buttons
 		self.widgets["bottomButtonRCL"] = cmds.rowColumnLayout(nc=2, w=330, cw=((1,250), (2,80)))
-		self.widgets["clearButton"] = cmds.button(l="Clear All Values!", w=250, h=30, bgc=(.8,.6,.6), c=self.clearAll)
-		self.widgets["restoreButton"] = cmds.button(l="Restore Base", w=80, h=30, bgc=(.8,.5,.5), c=self.restoreBase)
+		self.widgets["clearButton"] = cmds.button(l="Clear All Values!", w=330, h=30, bgc=(.8,.6,.6), c=self.clearAll)
+		# self.widgets["restoreButton"] = cmds.button(l="Restore Base", w=80, h=30, bgc=(.8,.5,.5), c=self.restoreBase)
 		cmds.showWindow(self.widgets["win"])
 		cmds.window(self.widgets["win"], e=True, w=330, h=500)
 
@@ -291,6 +293,7 @@ class AnimShift(object):
 
 		if sel:
 			for obj in sel:
+#TO-DO----------------this needs two options, one for how to do it with no frame range, one w frame range
 				cmds.keyframe(obj, at=("tx"), r=True, vc=dtx)
 				cmds.keyframe(obj, at=("ty"), r=True, vc=dty)
 				cmds.keyframe(obj, at=("tz"), r=True, vc=dtz)
@@ -361,19 +364,35 @@ class AnimShift(object):
 		cmds.floatFieldGrp(self.widgets["baseFrameFFG"], e=True, v1=0)
 
 
-	def restoreBase(self, *args):
-		"""restores the base obj to the text field"""
+	# def restoreBase(self, *args):
+	# 	"""restores the base obj to the text field"""
 
-		cmds.textFieldGrp(self.widgets["baseTFG"], e=True, tx=self.baseObj)
-		cmds.floatFieldGrp(self.widgets["baseFrameFFG"], e=True, v1=self.frame)
+	# 	cmds.textFieldGrp(self.widgets["baseTFG"], e=True, tx=self.baseObj)
+	# 	cmds.floatFieldGrp(self.widgets["baseFrameFFG"], e=True, v1=self.frame)
 
 #TO-DO----------------get frame ranges from UI, switch out options for enabled frame range
 	def enableRange(self, *args):
-		pass
+		"""toggles the frame range option on/off depending on what's selected in the range radio grp"""
+		#get the value of the radio button grp
+		sel = cmds.radioButtonGrp(self.widgets["timeRBG"], q=True, sl=True)
+
+		if sel == 3:
+			cmds.floatFieldGrp(self.widgets["rangeFFG"], e=True, en=True)
+		else:
+			cmds.floatFieldGrp(self.widgets["rangeFFG"], e=True, en=False)
 
 
 	def getRange(self, *args):
 		"""this finds the frame range and returns the StartFrame and EndFrame"""
+		#get time RBG
+		sel = cmds.radioButtonGrp(self.widgets["timeRBG"], q=True, sl=True)
+		if sel == 3:
+			#get values from ffg's
+			pass
+		if sel==2:
+			#figure out how to pass this to shift, so it doesn't look for frames	
+		if sel==1:
+			#capture values from time slider
 		pass
 
 def animShift(*args):
