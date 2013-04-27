@@ -1,3 +1,12 @@
+########################
+#file: zbw_dupeSwap.py
+#Author: zeth willie
+#Contact: zeth@catbuks.com, www.williework.blogspot.com
+#Date Modified: 04/27/13
+#To Use: type in python window  "import zbw_dupeSwap as zds; zds.dupeSwap()"
+#Notes/Descriptions: use to swap out objects for duplicates of the original object
+########################
+
 import maya.cmds as cmds
 
 def dupeSwapUI():

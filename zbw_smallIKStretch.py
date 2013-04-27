@@ -1,3 +1,12 @@
+########################
+#file: zbw_smallIKStretch.py
+#Author: zeth willie
+#Contact: zeth@catbuks.com, www.williework.blogspot.com
+#Date Modified: 04/27/13
+#To Use: type in python window  "import zbw_smallIKStretch as sik; sik.smallIKStretch"
+#Notes/Descriptions: makes a two joint ik stretch setup based on selected two joint chain
+########################
+
 import maya.cmds as cmds
 import zbw_rig as rig
 

@@ -1,10 +1,10 @@
 ########################
 #file: zbw_animShift.py
-#author: zeth willie
-#contact: zeth@catbuks.com, www.williework.blogspot.com
-#date modified: 4/23/13
-#
-#notes:
+#Author: zeth willie
+#Contact: zeth@catbuks.com, www.williework.blogspot.com
+#Date Modified: 4/27/13
+#To Use: type in python window  "import zbw_animShift as ash; ash.animShift()"
+#Notes/Descriptions: Used to move animation curves based on changes to a base object at a certain frame
 ########################
 
 import maya.cmds as cmds

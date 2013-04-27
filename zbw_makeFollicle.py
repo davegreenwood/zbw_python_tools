@@ -1,10 +1,10 @@
 ########################
 #file: zbw_makeFollicle.py
-#author: zeth willie
-#contact: zeth@catbuks.com, www.williework.blogspot.com
-#date modified: 
-#
-#notes: select a vertex on a polysurface and type name and create follicle
+#Author: zeth willie
+#Contact: zeth@catbuks.com, www.williework.blogspot.com
+#Date Modified: 04/27/13
+#To Use: type in python window  "import zbw_makeFollicle as fol; fol.makeFollicle()"
+#Notes/Descriptions: select a poly vertex and run to create a follicle stuck to the mesh at that location
 ########################
 
 #create a follicle on the specified uv location

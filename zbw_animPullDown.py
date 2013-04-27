@@ -1,4 +1,11 @@
-#pull down anim from root (or higher) node, which gets set to 000
+########################
+#file: zbw_animPullDown.py
+#Author: zeth willie
+#Contact: zeth@catbuks.com, www.williework.blogspot.com
+#Date Modified: 04/27/13
+#To Use: type in python window  "import zbw_animPullDown as apd; apd.animPullDown()"
+#Notes/Descriptions: Use in blocking. Move the master control and then run script to transfer the animation from the master control to the selected world controls under it
+########################
 
 import maya.cmds as cmds
 import maya.OpenMaya as om
@@ -23,7 +30,7 @@ def animPullDownUI():
         cmds.deleteUI("apdWin", window=True)
         cmds.windowPref("apdWin", remove=True)
 
-    widgets["win"] = cmds.window("apdWin", t="zbw_pullUpAnim", w=400, h=550)
+    widgets["win"] = cmds.window("apdWin", t="zbw_pullDownAnim", w=400, h=550)
 
 
     widgets["tabLO"] = cmds.tabLayout()

@@ -1,10 +1,10 @@
 ########################
 #file: zbw_attributes.py
-#author: zeth willie
-#contact: zeth@catbuks.com, www.williework.blogspot.com
-#date modified: 4/23/13
-#
-#notes: some basic stuff for everyday rigging involving channels and attrs. To run type "import zbw_attributes; zbw_attributes.attributes()"
+#Author: zeth willie
+#Contact: zeth@catbuks.com, www.williework.blogspot.com
+#Date Modified: 04/27/13
+#To Use: type in python window  "import zbw_attributes as att; att.attributes()"
+#Notes/Descriptions: Some basic functions for manipulating channels, attrs and connections
 ########################
 
 import maya.cmds as cmds

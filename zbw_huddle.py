@@ -1,4 +1,11 @@
-#write script that allows you to pick a pivot and the scale things closer to that, BUT not acutally scaling, but scaling the distance from that point
+########################
+#file: zbw_huddle.py
+#Author: zeth willie
+#Contact: zeth@catbuks.com, www.williework.blogspot.com
+#Date Modified: 04/27/13
+#To Use: type in python window  "import zbw_huddle as hud; hud.huddle()"
+#Notes/Descriptions:  Allows you to pick a pivot and the scale things closer to that, BUT not acutally scaling, but scaling the distance from that point
+########################
 
 import maya.cmds as cmds
 import maya.OpenMaya as om

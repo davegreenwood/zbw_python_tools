@@ -1,10 +1,10 @@
 ########################
 #file: zbw_appendPath.py
-#author: zeth willie
-#contact: zeth@catbuks.com, www.williework.blogspot.com
-#date modified: 04/23/13
-#
-#notes: put this in your scripts folder. use "import zbw_appendPath", then "zbw_appendPath.appendPath()"
+#Author: zeth willie
+#Contact: zeth@catbuks.com, www.williework.blogspot.com
+#Date Modified: 04/27/13
+#To Use: type in python window  "import zbw_appendPath as zap; zap.appendPath()"
+#Notes/Descriptions: use to add paths to the python path attribute, which allows you to import scripts from additional locations on your computer/network
 ########################
 
 import sys, os

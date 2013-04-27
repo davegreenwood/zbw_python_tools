@@ -1,10 +1,10 @@
 ########################
 #file: zbw_shapeScale.py
-#author: zeth willie
-#contact: zeth@catbuks.com, www.williework.blogspot.com, https://github.com/zethwillie
-#date modified: 09/23/12
-#
-#notes: creates a uI that one can use to scale selected nurbs curves from the cvs
+#Author: zeth willie
+#Contact: zeth@catbuks.com, www.williework.blogspot.com
+#Date Modified: 04/27/13
+#To Use: type in python window  "import zbw_shapeScale as zss; zss.shapeScale()"
+#Notes/Descriptions: Use to change the shape of a nurbsCurve by scaling the cv's
 ########################
 
 

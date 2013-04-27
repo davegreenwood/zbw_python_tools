@@ -1,4 +1,11 @@
-
+########################
+#file: zbw_createCurb.py
+#Author: zeth willie
+#Contact: zeth@catbuks.com, www.williework.blogspot.com
+#Date Modified: 04/27/13
+#To Use: type in python window  ""
+#Notes/Descriptions: use to create a contiguous poly surface based on an edge selection, etc
+########################
 
 import maya.cmds as cmds
 import maya.mel as mel

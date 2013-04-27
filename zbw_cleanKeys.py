@@ -1,10 +1,10 @@
 ########################
 #file: zbw_cleanKeys.py
-#author: zeth willie
-#contact: zeth@catbuks.com, www.williework.blogspot.com
-#date modified: 4/19/13
-#
-#notes: place in scripts folder (or other location in the sys.path) and in python tab, type "import zbw_cleanKeys;zbw_cleanKeys.cleanKeys()". This cleans your keyframes. Duh. There's also a global change tangent tab, too.
+#Author: zeth willie
+#Contact: zeth@catbuks.com, www.williework.blogspot.com
+#Date Modified: 04/27/13
+#To Use: type in python window  "import zbw_cleanKeys as zck; zck.cleanKeys()"
+#Notes/Descriptions: Use to clean up extra keys, etc in animation curves. Can be from master control or on individual controls
 ########################
 
 #TO-DO----------------separate out clean and tangent functions into separate modules. use window option for inheritance? ????

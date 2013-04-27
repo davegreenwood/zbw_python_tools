@@ -1,3 +1,12 @@
+########################
+#file: zbw_audioManager.py
+#Author: zeth willie
+#Contact: zeth@catbuks.com, www.williework.blogspot.com
+#Date Modified: 04/27/13
+#To Use: type in python window  "import zbw_audioManager as zam; zam.audioManager()"
+#Notes/Descriptions: used to manage some of the audio in your scene
+########################
+
 #audio manager
 import maya.cmds as cmds
 
