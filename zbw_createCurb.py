@@ -6,6 +6,7 @@ import maya.mel as mel
 #TO-DO----------------add float field grp to deal with the height fo the bump
 #TO-DO----------------rename things to be more generic
 #TO-DO----------------add description
+#TO-DO----------------option to keep history or not
 
 def curbUI(*args):
     #UI

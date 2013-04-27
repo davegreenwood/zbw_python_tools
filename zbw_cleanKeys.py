@@ -7,6 +7,8 @@
 #notes: place in scripts folder (or other location in the sys.path) and in python tab, type "import zbw_cleanKeys;zbw_cleanKeys.cleanKeys()". This cleans your keyframes. Duh. There's also a global change tangent tab, too.
 ########################
 
+#TO-DO----------------separate out clean and tangent functions into separate modules. use window option for inheritance? ????
+
 import maya.cmds as cmds
 from functools import partial
 widgets = {}
