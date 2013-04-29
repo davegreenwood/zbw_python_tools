@@ -13,6 +13,7 @@ import math
 from functools import partial
 import maya.mel as mel
 
+#TO-DO----------------add scroll list for putting objects with rotation only (world space FK objects)
 #TO-DO----------------add help menu with popup to describe situation
 #TO-DO----------------ADD ROTATION ORDERS INTO THE EQUATION HERE FOR EACH OBJECT
 #TO-DO----------------add option for including scale??

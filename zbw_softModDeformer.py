@@ -4,6 +4,8 @@ import maya.cmds as cmds
 #TO-DO----------------make secondary control for deformer location. .  try making this the PARENT of the main control.YES!!!
 #TO-DO----------------add soft select to another tab, figure out control, etc.
 #TO-DO----------------increment name on creation of deformer so you can quickly continue(maybe a checkbox for that)
+#TO-DO----------------check adn see if there are other deformers on the mesh
+
 
 widgets = {}
 
