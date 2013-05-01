@@ -13,16 +13,19 @@ import math
 from functools import partial
 import maya.mel as mel
 
-#TO-DO----------------add scroll list for putting objects with rotation only (world space FK objects)
-#TO-DO----------------add help menu with popup to describe situation
+#TO-DO----------------add scroll list for putting objects with rotation only (world space FK objects)?
 #TO-DO----------------ADD ROTATION ORDERS INTO THE EQUATION HERE FOR EACH OBJECT
+#TO-DO----------------add help menu with popup to describe situation
+#TO-DO----------------get tangents and use those in the new setup?
+#TO-DO----------------dummy check selections (for clear, grab selected, add to list, etc)
+
+
 #TO-DO----------------add option for including scale??
-#TO-DO----------------checkbox for using rotate pivot or translate? on master buttons area?
 #TO_DO----------------save out the selected controls to get them later?
 #TO-DO----------------figure out how to do step keys (step next)
 #TO-DO----------------option to select all objects in world ctrl list, double click in list to select?
 #TO-DO----------------frame range option? probably not necessary, think of a situation in which you'd need it
-#TO-DO----------------dummy check selections (for clear, grab selected, add to list, etc)
+
 widgets = {}
 
 def animPullDownUI():
