@@ -2,6 +2,8 @@
 import maya.cmds as cmds
 import zbw_rig as rig
 
+#TO-DO----------------maybe script breaking a poly shell into faces then attach those to the proxy geo
+
 def cardAttach():
 	sel = cmds.ls(sl=True)
 	#get all the cards (could be groups)
