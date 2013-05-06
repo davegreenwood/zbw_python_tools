@@ -1,7 +1,8 @@
 import maya.cmds as cmds
 import maya.mel as mel
-#This goes (on Mac): ~/Library/Preferences/Autodesk/maya/<version>/prefs/scripts/
-
+#Put this--------- 
+#(on Mac): ~/Library/Preferences/Autodesk/maya/<version>/prefs/scripts/
+#(on PC):  <drive>:\Documents and Settings\<username>\My Documents\maya\<Version>\scripts
 
 #on load evalDeferred() the set project script
 def setProjectUI():
