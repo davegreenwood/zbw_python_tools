@@ -3,7 +3,7 @@
 #Author: zeth willie
 #Contact: zeth@catbuks.com, www.williework.blogspot.com
 #Date Modified: 04/29/13
-#To Use: type in python window  "import zbw_cleanKeys as zck; zck.cleanKeys()"
+#To Use: type in python window  "import zbw_tangents as tan; tan.tangents()"
 #Notes/Descriptions: Use to clean up extra keys, etc in animation curves. Can be from master control or on individual controls
 ########################
 
@@ -13,7 +13,7 @@ import maya.cmds as cmds
 from functools import partial
 widgets = {}
 
-def cleanUI(*args):
+def tanUI(*args):
     """the UI for the clean/tangent functions"""
     if cmds.window("tanWin", exists=True):
         cmds.deleteUI("tanWin")
@@ -229,5 +229,5 @@ def selectHier(*args):
     else:
         cmds.warning("You don't have any transforms selected!")
 
-def cleanKeys(*args):
-    cleanUI()
+def tangents(*args):
+    tanUI()
