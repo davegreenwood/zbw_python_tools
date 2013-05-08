@@ -20,7 +20,7 @@ def snapUI():
 
     widgets["win"] = cmds.window("snapWin", t="zbw_snap", w=210, h=100)
     widgets["mainCLO"] = cmds.columnLayout(w=210, h=100)
-    cmds.text("Select the target object,\nthen the object you want to snap", al="center", w=210)
+    cmds.text("Select the target object(s),\nthen the object(s) you want to snap", al="center", w=210)
     cmds.separator(h=5, style="single")
     widgets["cbg"] = cmds.checkBoxGrp(l="Options: ", ncb=2, v1=1, v2=1, l1="Translate", l2="Rotate", cal=[(1,"left"),(2,"left"), (3,"left")], cw=[(1,50),(2,75),(3,75)])
     widgets["avgRBG"] = cmds.radioButtonGrp(nrb=2, l1="Snap all to first", l2="Snap last to avg", cal=[(1,"left"),(2,"left"),(3,"left")], cw=[(1,100),(2,100)],sl=1)
