@@ -24,6 +24,7 @@ def snapUI():
     cmds.separator(h=5, style="single")
     widgets["cbg"] = cmds.checkBoxGrp(l="Options: ", ncb=2, v1=1, v2=1, l1="Translate", l2="Rotate", cal=[(1,"left"),(2,"left"), (3,"left")], cw=[(1,50),(2,75),(3,75)])
     widgets["avgRBG"] = cmds.radioButtonGrp(nrb=2, l1="Snap all to first", l2="Snap last to avg", cal=[(1,"left"),(2,"left"),(3,"left")], cw=[(1,100),(2,100)],sl=1)
+    widgets["rpCB"] = cmds.checkBox(l="Use Pivot To Query Position?", v=1)
     cmds.separator(h=5, style="single")
     widgets["snapButton"] = cmds.button(l="Snap!", w=210, h=30, bgc=(.6,.8,.6), c=snapIt)
 
@@ -37,6 +38,7 @@ def snapIt(*args):
 
     translate = cmds.checkBoxGrp(widgets["cbg"], q=True, v1=True)
     rotate = cmds.checkBoxGrp(widgets["cbg"], q=True, v2=True)
+    pivot = cmds.checkBox(widgets["rpCB"], q=True, v=True)
 
     sel = cmds.ls(sl=True)
 
@@ -47,7 +49,11 @@ def snapIt(*args):
 
         for obj in objects:
             if translate:
-                targetPos = cmds.xform(target, ws=True, q=True, t=True)
+                if pivot:
+                    targetPos = cmds.xform(target, ws=True, q=True, rp=True)
+                else:
+                    targetPos = cmds.xform(target, ws=True, q=True, t=True)
+
                 cmds.xform(obj, ws=True, t=targetPos)
 
             if rotate:
@@ -77,7 +83,10 @@ def snapIt(*args):
             rzList = []
             TX, TY, TZ, RX, RY, RZ = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
             for tar in targets:
-                tarPos = cmds.xform(tar, q=True, ws=True, t=True)
+                if pivot:
+                    tarPos = cmds.xform(tar, q=True, ws=True, rp=True)
+                else:
+                    tarPos = cmds.xform(tar, q=True, ws=True, t=True)
                 txList.append(tarPos[0])
                 tyList.append(tarPos[1])
                 tzList.append(tarPos[2])
