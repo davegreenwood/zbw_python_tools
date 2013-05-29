@@ -1,6 +1,6 @@
 #
 #to run. . .
-#import zbw_clipPlanes as cp 
+#import zbw_clipPlanes as cp
 #cp.clipPlanes()
 #
 import maya.cmds as cmds
@@ -10,24 +10,25 @@ def setClipUI(*args):
         cmds.deleteUI("SCPwin")
     cmds.window("SCPwin", t="Set Clip Planes", w=200, h=100)
     cmds.columnLayout("colLO")
-    cmds.checkBox("allCB", l="All Cameras? (vs. selected)", v=True)
+    cmds.radioButtonGrp("camRBG", l="Cameras:", nrb=2, l1="All", l2="Selected", sl=1, cal=[(1,"left"),(2,"left"),(3,"left")], cw=[(1,70),(2,50),(3,50)])
     cmds.floatFieldGrp("nearFFG", l="nearClip", v1=1, cal=([1,"left"], [2,"left"]), cw=([1,50], [2,150]))
     cmds.floatFieldGrp("farFFG", l="farClip", v1=100000, cal=([1,"left"], [2,"left"]), cw=([1,50], [2,150]))
-    cmds.button("button", l="Set Clip Planes", h=50, w=250, bgc=(.8, .6,.6), c=setPlanes)
-    
+    cmds.separator(h=10,style="single")
+    cmds.button("button", l="Set Clip Planes", h=50, w=200, bgc=(.8, .6,.6), c=setPlanes)
+
     cmds.showWindow("SCPwin")
     cmds.window("SCPwin", e=True, w=200, h=100)
-    
-    
+
+
 def setPlanes(*args):
-    all = cmds.checkBox("allCB", q=True, v=True)
+    all = cmds.radioButtonGrp("camRBG", q=True, sl=True)
     far = cmds.floatFieldGrp("farFFG", q=True, v1=True)
     near = cmds.floatFieldGrp("nearFFG", q=True, v1=True)
-    
+
     cams = []
-    if all:
+    if all==1:
         cams.extend(cmds.ls(type="camera"))
-    if not all:
+    elif all==2:
         transf = cmds.ls(sl=True, type="transform")
         for each in transf:
             shape = cmds.listRelatives(each, s=True)
@@ -44,7 +45,7 @@ def setPlanes(*args):
 
             except:
                 cmds.warning("Couldn't change the farClipPlane of %s"%cam)
-    
-    
+
+
 def setClipPlanes(*args):
     setClipUI()
