@@ -25,7 +25,7 @@ def cleanUI(*args):
     cmds.text("Options for which keys to clean/delete:")
     cmds.separator(h=10)
     #radio button group for all selected or for hierarchy under selected
-    widgets["hierarchyRBG"] = cmds.radioButtonGrp(nrb=2, l1="Selected Objs Only", l2="Hierarchy Under Selected", sl=2, cc=enableCurve)
+    widgets["hierarchyRBG"] = cmds.radioButtonGrp(nrb=2, l1="Selected Objs Only", l2="Hierarchy Under Selected", sl=2, cw=[(1,120),(2,75),(3,75)] , cc=enableCurve)
     #radioButtons for time (timeslider, all anim, range)
     widgets["timeRBG"] = cmds.radioButtonGrp(nrb=3,l1="Timeslider", l2="All Anim", l3="Frame Range", sl=2, cw=[(1,100),(2,75),(3,75)] ,cc=partial(enableFR, "timeRBG", "frameRangeIFG", "keepCBG"))
     #int field group for frame range
