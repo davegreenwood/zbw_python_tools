@@ -2,6 +2,8 @@ import maya.cmds as cmds
 import random
 from functools import partial
 
+#TO-DO----------------make sure that it only evaluates on the attrs we want (store the values and add them without having to go the frames for each)
+
 widgets = {}
 
 def animNoiseUI():

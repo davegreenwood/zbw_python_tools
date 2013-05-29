@@ -272,6 +272,7 @@ class AnimShift(object):
 	def shiftAnim(self, *args):
 		"""method that does the shifting"""
 #TO-DO----------------possible to-do? Deal with locked or already driven channels?
+#TO-DO----------------eval the curve at that point, then set the value in world space, then eval the curve again, then find the difference and move the curve that much (how will this work for rotation?)
 
 		self.getRange()
 		#print "start Frame: %s. . . endFrame: %s"%(self.startF, self.endF)
