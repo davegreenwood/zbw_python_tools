@@ -39,8 +39,8 @@ def appendUI():
 	cmds.separator(h=10, st="single")
 
 	widgets["buttonRCL"] = cmds.rowColumnLayout(nc=3, w=500, cw=[(1,123),(2,247 ),(3,123)])
-	widgets["addCloseBut"] = cmds.button(l="Add Paths", w=120, h=30, bgc=(.6, .8, .6), c=apply)
-	widgets["addBut"] = cmds.button(l="Add Paths and Close", w=245, h=30, bgc=(.8, .8, .6), c=applyClose)
+	widgets["addCloseBut"] = cmds.button(l="Add and Close", w=120, h=30, bgc=(.6, .8, .6), c=applyClose)
+	widgets["addBut"] = cmds.button(l="Add Paths!", w=245, h=30, bgc=(.8, .8, .6), c=apply)
 	widgets["closeBut"] = cmds.button(l="Close", w=120, h=30, bgc=(.8,.6,.6), c=close)
 
 	cmds.setParent(widgets["columnLO"])
