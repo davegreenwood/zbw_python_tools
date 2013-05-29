@@ -51,7 +51,6 @@ def softDeformerUI():
 # --------------------------
 
 def softModDeformerDo(*args):
-#TO-DO----------------use long names for objects?
     check = cmds.checkBoxGrp(widgets["checkCBG"], q=True, v1=True)
     increment = cmds.checkBoxGrp(widgets["incrCBG"], q=True, v1=True)
     toParent = cmds.checkBoxGrp(widgets["parentCBG"], q=True, v1=True)
