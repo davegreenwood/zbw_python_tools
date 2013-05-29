@@ -11,10 +11,6 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 
-#TO-DO----------------put the softmod under a follicle that is attached to the skin?
-#TO-DO----------------maybe option to orient to the vertex? Is that even possible w/ softmod
-#TO-DO----------------see if I can get the softmod deformer itself to rotate? I could connect it to normal of closest point?
-
 widgets = {}
 
 def softDeformerUI():
@@ -126,59 +122,79 @@ def softModDeformerDo(*args):
         cmds.connectAttr("%s.rotate"%control, "%s.rotate"%softModXform)
         cmds.connectAttr("%s.scale"%control, "%s.scale"%softModXform)
 
-        # create an attr on the control for the falloff and the center control vis
+        cmds.addAttr(control, ln="__XTRA__", at="enum", k=True)
+        cmds.setAttr("%s.__XTRA__"%control, l=True)
+
+        # cmds.addAttr(control, ln="centerCtrlVis", at="bool", min=0, max=1, k=True, dv=0)
+        cmds.addAttr(control, ln="envelope", at="float", min=0, max=1, k=True, dv=1)
         cmds.addAttr(control, ln="falloff", at="float", min=0, max=100, k=True, dv=5)
-        cmds.addAttr(control, ln="centerCtrlVis", at="bool", min=0, max=1, k=True, dv=0)
+        # cmds.addAttr(control, ln="centerX", at="float", dv=0, k=True)
+        # cmds.addAttr(control, ln="centerY", at="float", dv=0, k=True)
+        # cmds.addAttr(control, ln="centerZ", at="float", dv=0, k=True)
 
         # connect that attr to the softmod falloff radius
+        cmds.connectAttr("%s.envelope"%control, "%s.envelope"%softMod)
         cmds.connectAttr("%s.falloff"%control, "%s.falloffRadius"%softMod)
 
         # inherit transforms on softModHandle are "off"
         cmds.setAttr("%s.inheritsTransform"%softModXform, 0)
 
-    #TO-DO----------------add option to change softmod from volume to surface?
-        centerName = defName + "_center_CTRL"
-        #create secondary (area of influence) control here
-        centerCtrl = cmds.curve(n=centerName, d=1, p=[[-1.137096, -1.137096, 1.137096], [-1.137096, 1.137096, 1.137096], [1.137096, 1.137096, 1.137096], [1.137096, -1.137096, 1.137096], [-1.137096, -1.137096, 1.137096], [-1.137096, -1.137096, -1.137096], [-1.137096, 1.137096, -1.137096], [-1.137096, 1.137096, 1.137096], [1.137096, 1.137096, 1.137096], [1.137096, 1.137096, -1.137096], [1.137096, -1.137096, -1.137096], [1.137096, -1.137096, 1.137096], [1.137096, -1.137096, -1.137096], [-1.137096, -1.137096, -1.137096], [-1.137096, 1.137096, -1.137096], [1.137096, 1.137096, -1.137096]])
+        # centerName = defName + "_center_CTRL"
+        # #create secondary (area of influence) control here
+        # centerCtrl = cmds.curve(n=centerName, d=1, p=[[-1.137096, -1.137096, 1.137096], [-1.137096, 1.137096, 1.137096], [1.137096, 1.137096, 1.137096], [1.137096, -1.137096, 1.137096], [-1.137096, -1.137096, 1.137096], [-1.137096, -1.137096, -1.137096], [-1.137096, 1.137096, -1.137096], [-1.137096, 1.137096, 1.137096], [1.137096, 1.137096, 1.137096], [1.137096, 1.137096, -1.137096], [1.137096, -1.137096, -1.137096], [1.137096, -1.137096, 1.137096], [1.137096, -1.137096, -1.137096], [-1.137096, -1.137096, -1.137096], [-1.137096, 1.137096, -1.137096], [1.137096, 1.137096, -1.137096]])
 
-        centerCtrlSh = cmds.listRelatives(centerCtrl, s=True)
-        for shape in centerCtrlSh:
-            #turn on overrides
-            cmds.setAttr("%s.overrideEnabled"%shape, 1)
-            cmds.connectAttr("%s.centerCtrlVis"%control, "%s.overrideVisibility"%shape)
-            cmds.setAttr("%s.overrideColor"%shape, 13)
+        # centerCtrlSh = cmds.listRelatives(centerCtrl, s=True)
+        # for shape in centerCtrlSh:
+        #     #turn on overrides
+        #     cmds.setAttr("%s.overrideEnabled"%shape, 1)
+        #     cmds.connectAttr("%s.centerCtrlVis"%control, "%s.overrideVisibility"%shape)
+        #     cmds.setAttr("%s.overrideColor"%shape, 13)
 
-        centerGrp = cmds.group(centerCtrl, n="%s_GRP"%centerName)
-        #turn off scale and rotation for the center control
-        cmds.setAttr("%s.rotate"%centerCtrl, k=False, l=True)
-        cmds.setAttr("%s.scale"%centerCtrl, k=False, l=True)
-        cmds.setAttr("%s.visibility"%centerCtrl, k=False, l=True)
+        # centerGrp = cmds.group(centerCtrl, n="%s_GRP"%centerName)
+        # #turn off scale and rotation for the center control
+        # cmds.setAttr("%s.rotate"%centerCtrl, k=False, l=True)
+        # cmds.setAttr("%s.scale"%centerCtrl, k=False, l=True)
+        # cmds.setAttr("%s.visibility"%centerCtrl, k=False, l=True)
 
-        #move the group to the location
-        cmds.xform(centerGrp, ws=True, t=vertPos)
+        # #move the group to the location
+        # cmds.xform(centerGrp, ws=True, t=vertPos)
 
-        # create decompose matrix node and connect world matrix of centercontrol to falloffCenter
-        decompName = defName + "_decomp"
-        decomp = cmds.shadingNode("decomposeMatrix", asUtility=True, n=decompName)
-        # connect centerCtrl to decompMatrix, connect decompMatrix.outputTranslate to falloffCenter
-        cmds.connectAttr("%s.worldMatrix[0]"%centerCtrl, "%s.inputMatrix"%decomp)
-        cmds.connectAttr("%s.outputTranslate"%decomp, "%s.falloffCenter"%softMod)
+        # plusName = defName + "_plus"
+        # plusNode = cmds.shadingNode("plusMinusAverage", asUtility=True, n=plusName)
+
+        # cmds.connectAttr("%s.translate"%centerGrp, "%s.input3D[0]"%plusNode, f=True)
+        # cmds.connectAttr("%s.translate"%centerCtrl, "%s.input3D[1]"%plusNode, f=True)
+        # cmds.connectAttr("%s.output3D"%plusNode, "%s.falloffCenter"%softMod, f=True)
 
         #hide the softmod
         cmds.setAttr("%s.visibility"%softModXform, 0)
 
         #group the group and the softmod xform
-        defGroup = cmds.group(softModXform, controlGrp, n=(defName + "_deform_GRP"))
-
+        # defGroup = cmds.group(softModXform, controlGrp, n=(defName + "_deform_GRP"))
+        defGroup = cmds.group(empty=True, n=(defName + "_deform_GRP"))
+        cmds.xform(defGroup, ws=True, t=vertPos)
+        cmds.parent(softModXform, controlGrp, defGroup)
         #parent the softmod under the centerCtrl
-        cmds.parent(defGroup, centerCtrl)
+        # cmds.parent(defGroup, centerCtrl)
 
         #parent that group under the obj?
         if toParent:
-            cmds.parent(centerGrp, obj)
+            cmds.parent(defGroup, obj)
+
+        # #connect group translate to plus node
+        # plusName = defName + "_plus"
+        # plusNode = cmds.shadingNode("plusMinusAverage", asUtility=True, n=plusName)
+        # cmds.connectAttr("%s.translate"%defGroup, "%s.input3D[0]"%plusNode)
+
+        # #connect to falloff center
+        # cmds.connectAttr("%s.centerX"%control, "%s.input3D[1].input3Dx"%plusNode)
+        # cmds.connectAttr("%s.centerY"%control, "%s.input3D[1].input3Dy"%plusNode)
+        # cmds.connectAttr("%s.centerZ"%control, "%s.input3D[1].input3Dz"%plusNode)
+
+        # cmds.connectAttr("%s.output3D"%plusNode, "%s.falloffCenter"%softMod)
 
         #scale the controls
-        scaleCtrl([centerCtrl, control], scaleFactor)
+        scaleCtrl([control], scaleFactor)
 
         #increment name
         if increment == 1:
