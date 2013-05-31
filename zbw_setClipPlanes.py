@@ -6,6 +6,8 @@
 import maya.cmds as cmds
 
 def setClipUI(*args):
+    """ UI for the whole thing"""
+
     if cmds.window("SCPwin", exists=True):
         cmds.deleteUI("SCPwin")
     cmds.window("SCPwin", t="Set Clip Planes", w=200, h=100)
@@ -21,6 +23,8 @@ def setClipUI(*args):
 
 
 def setPlanes(*args):
+    """sets clipping planes for cameras based on float fields in UI. Depending on radio button, it will either do all camera or only selected"""
+
     all = cmds.radioButtonGrp("camRBG", q=True, sl=True)
     far = cmds.floatFieldGrp("farFFG", q=True, v1=True)
     near = cmds.floatFieldGrp("nearFFG", q=True, v1=True)
@@ -48,4 +52,6 @@ def setPlanes(*args):
 
 
 def setClipPlanes(*args):
+    """Use this to start the script!"""
+
     setClipUI()

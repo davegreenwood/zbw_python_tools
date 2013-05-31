@@ -14,6 +14,8 @@ import maya.OpenMaya as OpenMaya
 widgets = {}
 
 def softDeformerUI():
+    """UI for the whole thing"""
+
     if cmds.window("softModWin", exists = True):
         cmds.deleteUI("softModWin")
     widgets["window"] = cmds.window("softModWin", t="zbw_softDeformer", w=300, h=130)
@@ -51,6 +53,8 @@ def softDeformerUI():
 # --------------------------
 
 def softModDeformerDo(*args):
+    """creates and sets up the softmod deformer setup"""
+
     check = cmds.checkBoxGrp(widgets["checkCBG"], q=True, v1=True)
     increment = cmds.checkBoxGrp(widgets["incrCBG"], q=True, v1=True)
     toParent = cmds.checkBoxGrp(widgets["parentCBG"], q=True, v1=True)
@@ -222,6 +226,7 @@ def softModDeformerDo(*args):
 
 #TO-DO----------------checks on whether a) something is selected b) vertices are selected
 def getSoftSelection():
+    """from brian ???, gets the list of softselection components and passes out the verts and the weights"""
     #Grab the soft selection
     selection = OpenMaya.MSelectionList()
     softSelection = OpenMaya.MRichSelection()
@@ -390,6 +395,7 @@ def integerTest(test, *args):
         return False
 
 def getDeformers(obj, *args):
+    """gets a list of deformers on the passed obj"""
     history = cmds.listHistory(obj)
     Arrdeformers = []
     for node in history:
@@ -399,12 +405,14 @@ def getDeformers(obj, *args):
     return Arrdeformers
 
 def scaleCtrl(objs=[], scale=1.0, *args):
+    """scales all of the cvs of selected controls and scales them by 'scale' value"""
     for obj in objs:
         cmds.select("%s.cv[:]"%obj, r=True)
         cmds.scale(scale, scale, scale)
         cmds.select(cl=True)
 
 def avgElementPos(verts, *args):
+    """uses a list of verts and gets the average position"""
     #get a selection of verts and avg their position
     xVal = []
     yVal = []
@@ -436,6 +444,7 @@ def avgElementPos(verts, *args):
 
 
 def softDeformer():
+    """Use this to start the script!"""
     softDeformerUI()
 
 

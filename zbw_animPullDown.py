@@ -449,4 +449,6 @@ def pullDownAnim(*args):
 
 
 def animPullDown():
+    """Use this to start the script!"""
+
     animPullDownUI()

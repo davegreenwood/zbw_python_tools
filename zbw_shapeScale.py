@@ -13,6 +13,8 @@ import maya.cmds as cmds
 widgets = {}
 
 def shapeScaleUI():
+	"""UI for the script"""
+
 	if (cmds.window("ssWin", exists=True)):
 		cmds.deleteUI("ssWin", window=True)
 		#cmds.winPref("shapeScaleWin", remove=True)
@@ -43,9 +45,14 @@ def shapeScaleUI():
 	cmds.window(widgets["win"], e=True, w=400, h=75)
 
 def resetScale(*args):
+	"""resets the scale float field"""
+
 	cmds.floatFieldGrp(widgets["trackerFFG"], e=True, v1=100)
 
 def origScale(*args):
+	"""scales the object by the inverse of the currentScale (as measured by the tracker floatfield). So if everything was reset when you started it will
+	undo all subsequent scaling operations"""
+
 	currScale = cmds.floatFieldGrp(widgets["trackerFFG"], q=True, v1=True)
 	scaleVal = 100/currScale
 	# print "%s = factor"%factor
@@ -79,6 +86,7 @@ def origScale(*args):
 
 
 def manualScale(*args):
+	"""uses the float field group to manually scale the object by that amount"""
 	origScale = cmds.floatFieldGrp(widgets["trackerFFG"], q=True, v1=True)
 
 	#get value from field
@@ -159,5 +167,7 @@ def shapeScaleExecute(*args):
 		cmds.floatFieldGrp(widgets["trackerFFG"], e=True, v1=newScale)
 
 def shapeScale():
+    """Use this to start the script!"""
+
 	shapeScaleUI()
 

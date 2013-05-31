@@ -13,6 +13,7 @@ widgets = {}
 
 def cleanUI(*args):
     """the UI for the clean/tangent functions"""
+
     if cmds.window("cleanWin", exists=True):
         cmds.deleteUI("cleanWin")
 
@@ -54,6 +55,7 @@ def cleanUI(*args):
 
 def enableSelect(*args):
     """when hierarchy is selected, this enables the option for curves only """
+
     val = cmds.radioButtonGrp(widgets["tanHierRBG"], q=True, sl=True)
     if val==2:
         cmds.radioButtonGrp(widgets["tanCurvesRBG"], e=True, en=True)
@@ -64,6 +66,7 @@ def enableSelect(*args):
 
 def getSliderRange(*args):
     """gets framerange in current scene and returns start and end frames"""
+
     #get timeslider range start
     startF = cmds.playbackOptions(query=True, min=True)
     endF = cmds.playbackOptions(query=True, max=True)
@@ -71,6 +74,7 @@ def getSliderRange(*args):
 
 def enableCurve(*args):
     """when hierarchy is selected, this enables the option for curves only """
+
     val = cmds.radioButtonGrp(widgets["hierarchyRBG"], q=True, sl=True)
     if val==2:
         cmds.radioButtonGrp(widgets["curvesRBG"], e=True, en=True)
@@ -79,6 +83,7 @@ def enableCurve(*args):
 
 def enableFR(source, intField, singles=None, *args):
     """when frame range option is selected, this activates the frame range int field group"""
+
     val = cmds.radioButtonGrp(widgets[source], q=True, sl=True)
     if val==3:
         cmds.intFieldGrp(widgets[intField], e=True, en=True)
@@ -98,6 +103,7 @@ def enableFR(source, intField, singles=None, *args):
 
 def clean(*args):
     """this cleans the keyframes based on the settings in clean tab"""
+
     #get info from options in UI
     hier = cmds.radioButtonGrp(widgets["hierarchyRBG"], q=True, sl=True)
     timeOption = cmds.radioButtonGrp(widgets["timeRBG"], q=True, sl=True)
@@ -255,6 +261,7 @@ def clean(*args):
 
 def selectHier(*args):
     """this selects the objects based on the filters in the tangents tab"""
+
     #get selected objects
     hier = cmds.radioButtonGrp(widgets["hierarchyRBG"], q=True, sl=True)
     curves = cmds.radioButtonGrp(widgets["curvesRBG"], q=True, sl=True)
@@ -310,4 +317,6 @@ def selectHier(*args):
         cmds.warning("You don't have any transforms selected!")
 
 def cleanKeys(*args):
+    """Use this to start the script!"""
+
     cleanUI()

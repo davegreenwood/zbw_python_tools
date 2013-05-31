@@ -15,6 +15,8 @@ widgets = {}
 
 #here create a UI that will just pass info into the main func. So you can call function if you want with args or use the UI
 def follicleUI(*args):
+    """UI for the script"""
+
     if cmds.window("folWin", exists=True):
         cmds.deleteUI("folWin")
 
@@ -37,6 +39,7 @@ def follicleUI(*args):
 
 def getUV(*args):
     """takes a selection of one or two verts and returns one UV position. If just the surface is selected, it will return UV vals of (.5, .5)"""
+
     #get vertex
     sel = cmds.ls(sl=True)
     #------filter for vertices (or cvs?)
@@ -110,6 +113,8 @@ def getUV(*args):
             pass
 
 def follicle(surface="none", folName="none", u=0.5, v=0.5, *args):
+    """not quite finished here. . . takes the surface/mesh, a name for the follicle and u & v positions as args and creates a follicle at that uv position on that surface"""
+
 #------------do a bit more checking here to make sure the shapes, numbers etc work out
 #------------i.e. make sure the name of the follicle isn't already taken before trying to create the new one
     # print "surface is: %s"%surface
@@ -131,7 +136,7 @@ def follicle(surface="none", folName="none", u=0.5, v=0.5, *args):
             folShapeName = "%sShape"%folName
             folXformName = folName
 
-    	#create the follicle
+        #create the follicle
         folShape = cmds.createNode("follicle", n=folShapeName)
         folXform = cmds.listRelatives(folShape, p=True, type="transform")[0]
         cmds.rename(folXform, folXformName)
@@ -176,7 +181,8 @@ def follicle(surface="none", folName="none", u=0.5, v=0.5, *args):
         cmds.warning("That name already exists! Choose another name!")
 
 def integerTest(test, *args):
-    """use to test if a variable is an integer"""
+    """use to test if the arg is an integer"""
+
     try:
         int(test)
         return True
@@ -184,4 +190,6 @@ def integerTest(test, *args):
         return False
 
 def makeFollicle():
+    """Use this to start the script!"""
+
     follicleUI()

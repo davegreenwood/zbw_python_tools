@@ -10,6 +10,8 @@
 import maya.cmds as cmds
 
 def dupeSwapUI():
+    """UI for script"""
+
     if cmds.window("dupeWin", exists=True):
         cmds.deleteUI("dupeWin")
 
@@ -26,6 +28,8 @@ def dupeSwapUI():
     cmds.window("dupeWin", e=True, w=200, h=100)
 
 def dupeIt(*args):
+    """uses the first selection and duplicates it to the transforms of the rest of the selected objects, with or without connections"""
+
     sel=cmds.ls(sl=True, type="transform", l=True)
     inputs = cmds.checkBox("inputsCB", q=True, v=True)
     if sel:
@@ -62,4 +66,6 @@ def dupeIt(*args):
 
 
 def dupeSwap():
+    """Use this to start the script!"""
+
     dupeSwapUI()

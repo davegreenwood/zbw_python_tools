@@ -230,4 +230,5 @@ def selectHier(*args):
         cmds.warning("You don't have any transforms selected!")
 
 def tangents(*args):
+    """Use this to start the script!"""
     tanUI()

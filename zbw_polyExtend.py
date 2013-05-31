@@ -11,6 +11,7 @@ import maya.cmds as cmds
 import maya.mel as mel
 
 def extendUI(*args):
+    """UI for the script"""
     #UI
     if cmds.window("curbWin", exists=True):
         cmds.deleteUI("curbWin")
@@ -44,6 +45,8 @@ def extendUI(*args):
 
 
 def convertEdge(*args):
+    """converts the selected poly edge to a nurbs curve"""
+
     sel = cmds.ls(sl=True, type="transform")
     try:
         mel.eval("polyToCurve -form 2 -degree 3;")
@@ -51,6 +54,8 @@ def convertEdge(*args):
         cmds.warning("Couldn't complete this operation! Sorry buddy. Maybe you haven't selected a poly edge?")
 
 def enableHistory(*args):
+    """turns on/off the history checkbox"""
+
     #if keep objs is off, then history on poly is off and disabled
     keep = cmds.checkBox("history", q=True, v=True)
     if keep:
@@ -59,6 +64,8 @@ def enableHistory(*args):
         cmds.checkBox("polyHistory", e=True, en=False, v=False)
 
 def extendPoly(*args):
+    """does the polyextension by grabbing the curve, offsetting it and then lofting. Then converts the nurbs surface to polys"""
+
     #make sure a curve is selected
     selection = cmds.ls(sl=True)
     if selection:
@@ -113,4 +120,6 @@ def extendPoly(*args):
 
 
 def polyExtend():
+    """Use this to start the script!"""
+
     extendUI()

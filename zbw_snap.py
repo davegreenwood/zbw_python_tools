@@ -132,4 +132,6 @@ def snapIt(*args):
             cmds.warning("You need to select two objects or more!")
 
 def snap(*args):
+    """function to run the script"""
+
     snapUI()
