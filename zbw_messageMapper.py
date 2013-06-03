@@ -13,6 +13,8 @@ from functools import partial
 
 #create a window
 def zbw_mmUI():
+    """the UI for the script"""
+
     if (cmds.window('`UI', exists=True)):
         cmds.deleteUI('zbw_messageMapperUI', window=True)
         cmds.windowPref('zbw_messageMapperUI', remove=True)
@@ -308,4 +310,6 @@ def zbw_mmChangeConnectObj(base, attr, obj, *args):
     zbw_mmListCurrentMessages("mmListMessages")
 
 def messageMapper():
+    """use this to start the script!"""
+
     zbw_mmUI()
