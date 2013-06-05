@@ -15,23 +15,24 @@ def dupeSwapUI():
     if cmds.window("dupeWin", exists=True):
         cmds.deleteUI("dupeWin")
 
-    cmds.window("dupeWin", t="zbw_dupeSwap", w=200, h=100)
+    cmds.window("dupeWin", t="zbw_dupeSwap", w=250, h=100)
     cmds.columnLayout("dupeCLO")
-    cmds.text("Select the initial object. then select\nthe duplicates and press button")
+    cmds.text("Select the initial object. then select the", al="center", w=250)
+    cmds.text("duplicates and press button", al="center", w=250)
     cmds.separator(h=5, style ="single")
-    cmds.checkBox("inputsCB", l="Duplicate Input Graph?", v=False)
+    cmds.radioButtonGrp("inputsRBG", l="inputs:", nrb=3, l1="none", l2="connect", l3="duplicate", cw=[(1, 50), (2,47), (3,63), (4,40)], cal=[(1,"left"), (2,"left"), (3,"left"), (4,"left")], sl=1)
     cmds.separator(h=5, style ="single")
 
-    cmds.button("dupeButton", l="Swap Elements", w=200, h=50, bgc=(.6, .8,.6), c=dupeIt)
+    cmds.button("dupeButton", l="Swap Elements", w=250, h=50, bgc=(.6, .8,.6), c=dupeIt)
 
     cmds.showWindow("dupeWin")
-    cmds.window("dupeWin", e=True, w=200, h=100)
+    cmds.window("dupeWin", e=True, w=250, h=100)
 
 def dupeIt(*args):
     """uses the first selection and duplicates it to the transforms of the rest of the selected objects, with or without connections"""
 
     sel=cmds.ls(sl=True, type="transform", l=True)
-    inputs = cmds.checkBox("inputsCB", q=True, v=True)
+    inputs = cmds.radioButtonGrp("inputsRBG", q=True, sl=True)
     if sel:
         base=sel[0]
         if len(sel)>1:
@@ -51,11 +52,13 @@ def dupeIt(*args):
                 x=x+1
 
             for key in transforms.keys():
-                if not inputs:
+                if inputs == 1:
                     dupe = cmds.duplicate(base)[0]
-                elif inputs:
+                elif inputs == 3:
                     dupe = cmds.duplicate(base, un=True, rr=True)[0]
-                #print dupe
+                elif inputs == 2:
+                    dupe = cmds.duplicate(base, ic=True)[0]
+                print dupe
                 cmds.xform(dupe, ws=True, t=transforms[key][0])
                 cmds.xform(dupe, ws=True, ro=transforms[key][1])
                 cmds.setAttr("%s.scale"%dupe, transforms[key][2][0], transforms[key][2][1], transforms[key][2][2])
